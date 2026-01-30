@@ -1,0 +1,43 @@
+<div class="code-runner-container">
+    <header class="header">
+        <h1 class="title">
+            <span class="icon">⚡</span>
+            Code Runner
+        </h1>
+        <p class="subtitle">Write, test, and run your code with syntax highlighting and autocompletion</p>
+    </header>
+
+    <div class="controls">
+        <div class="control-group">
+            <label for="language-select" class="control-label">
+                <span class="label-icon">🔤</span>
+                Language
+            </label>
+            <select id="language-select" class="language-select" [value]="selectedLanguage()"
+                (change)="onLanguageChange($event)">
+                @for (lang of languages; track lang.id) {
+                <option [value]="lang.id">{{ lang.name }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="button-group">
+            <button class="btn btn-secondary" (click)="clearCode()">
+                <span class="btn-icon">🔄</span>
+                Reset
+            </button>
+            <button class="btn btn-primary" (click)="runCode()">
+                <span class="btn-icon">▶</span>
+                Run Code
+            </button>
+        </div>
+    </div>
+
+    <div class="editor-wrapper">
+        <div class="editor-header">
+            <span class="editor-title">{{ selectedLanguage() === 'python' ? 'main.py' : 'Main.kt' }}</span>
+            <span class="editor-info">Monaco Editor • {{ selectedLanguage() }}</span>
+        </div>
+        <div #editorContainer class="editor-container"></div>
+    </div>
+</div>
