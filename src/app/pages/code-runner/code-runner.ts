@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChild, sig
 import { CommonModule } from '@angular/common';
 import * as monaco from 'monaco-editor';
 
-type SupportedLanguage = 'python' | 'kotlin';
+type SupportedLanguage = 'c' | 'cpp' | 'python' | 'java' | 'kotlin';
 
 interface LanguageOption {
     id: SupportedLanguage;
@@ -21,10 +21,45 @@ export class CodeRunner implements OnInit, AfterViewInit, OnDestroy {
 
     private editor?: monaco.editor.IStandaloneCodeEditor;
 
-    protected readonly selectedLanguage = signal<SupportedLanguage>('python');
+    protected readonly selectedLanguage = signal<SupportedLanguage>('c');
     protected readonly code = signal<string>('');
 
     protected readonly languages: LanguageOption[] = [
+        {
+            id: 'c',
+            name: 'C',
+            defaultCode: `// C Code Runner
+#include <stdio.h>
+#include <string.h>
+
+void greet(const char* name) {
+    printf("Hello, %s! Welcome to Code Runner.\\n", name);
+}
+
+int main() {
+    greet("Developer");
+    return 0;
+}
+`
+        },
+        {
+            id: 'cpp',
+            name: 'C++',
+            defaultCode: `// C++ Code Runner
+#include <iostream>
+#include <string>
+
+std::string greet(const std::string& name) {
+    return "Hello, " + name + "! Welcome to Code Runner.";
+}
+
+int main() {
+    std::string message = greet("Developer");
+    std::cout << message << std::endl;
+    return 0;
+}
+`
+        },
         {
             id: 'python',
             name: 'Python',
@@ -33,10 +68,25 @@ def greet(name):
     """Greet someone with a friendly message."""
     return f"Hello, {name}! Welcome to Code Runner."
 
-# Example usage
 if __name__ == "__main__":
     message = greet("Developer")
     print(message)
+`
+        },
+        {
+            id: 'java',
+            name: 'Java',
+            defaultCode: `// Java Code Runner
+public class Main {
+    public static String greet(String name) {
+        return "Hello, " + name + "! Welcome to Code Runner.";
+    }
+    
+    public static void main(String[] args) {
+        String message = greet("Developer");
+        System.out.println(message);
+    }
+}
 `
         },
         {
@@ -47,7 +97,6 @@ fun greet(name: String): String {
     return "Hello, $name! Welcome to Code Runner."
 }
 
-// Example usage
 fun main() {
     val message = greet("Developer")
     println(message)
