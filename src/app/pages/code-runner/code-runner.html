@@ -14,7 +14,7 @@
                 Language
             </label>
             <select id="language-select" class="language-select" [value]="selectedLanguage()"
-                (change)="onLanguageChange($event)">
+                (change)="onLanguageChange($event)" [disabled]="isLoading()">
                 @for (lang of languages; track lang.id) {
                 <option [value]="lang.id">{{ lang.name }}</option>
                 }
@@ -22,22 +22,94 @@
         </div>
 
         <div class="button-group">
-            <button class="btn btn-secondary" (click)="clearCode()">
+            <button class="btn btn-secondary" (click)="clearCode()" [disabled]="isLoading()">
                 <span class="btn-icon">🔄</span>
-                Reset
+                Reset Code
             </button>
-            <button class="btn btn-primary" (click)="runCode()">
+            <button class="btn btn-primary" (click)="runCode()" [disabled]="isLoading()">
+                @if (isLoading()) {
+                <span class="btn-icon spinner">⏳</span>
+                Running...
+                } @else {
                 <span class="btn-icon">▶</span>
                 Run Code
+                }
             </button>
         </div>
     </div>
 
-    <div class="editor-wrapper">
-        <div class="editor-header">
-            <span class="editor-title">{{ selectedLanguage() === 'python' ? 'main.py' : 'Main.kt' }}</span>
-            <span class="editor-info">Monaco Editor • {{ selectedLanguage() }}</span>
+    <div class="main-content">
+        <!-- Code Editor Section -->
+        <div class="editor-section">
+            <div class="editor-wrapper">
+                <div class="editor-header">
+                    <span class="editor-title">
+                        @switch (selectedLanguage()) {
+                        @case ('c') { main.c }
+                        @case ('cpp') { main.cpp }
+                        @case ('python') { main.py }
+                        @case ('java') { Main.java }
+                        @case ('kotlin') { Main.kt }
+                        }
+                    </span>
+                    <span class="editor-info">Monaco Editor • {{ selectedLanguage() }}</span>
+                </div>
+                <div #editorContainer class="editor-container"></div>
+            </div>
+
+            <!-- Input Data Section -->
+            <div class="input-wrapper">
+                <div class="input-header">
+                    <span class="input-title">
+                        <span class="label-icon">📥</span>
+                        Input Data
+                    </span>
+                    <button class="btn-clear" (click)="clearInput()" [disabled]="isLoading()">Clear</button>
+                </div>
+                <textarea class="input-textarea" [(ngModel)]="inputData"
+                    placeholder="Enter input data here (if required by your code)..."
+                    [disabled]="isLoading()"></textarea>
+            </div>
         </div>
-        <div #editorContainer class="editor-container"></div>
+
+        <!-- Output Section -->
+        <div class="output-section">
+            <div class="output-wrapper">
+                <div class="output-header">
+                    <span class="output-title">
+                        <span class="label-icon">📤</span>
+                        Output
+                    </span>
+                    <button class="btn-clear" (click)="clearOutput()" [disabled]="isLoading()">Clear</button>
+                </div>
+                <div class="output-content">
+                    @if (isLoading()) {
+                    <div class="loading-container">
+                        <div class="loading-spinner"></div>
+                        <p>Executing code...</p>
+                    </div>
+                    } @else if (output()) {
+                    <pre class="output-text">{{ output() }}</pre>
+                    @if (executionStats()) {
+                    <div class="execution-stats">
+                        <span class="stat">
+                            <span class="stat-icon">⏱️</span>
+                            Time: {{ executionStats()!.time.toFixed(3) }}s
+                        </span>
+                        <span class="stat">
+                            <span class="stat-icon">💾</span>
+                            Memory: {{ (executionStats()!.memory / 1024).toFixed(2) }} MB
+                        </span>
+                    </div>
+                    }
+                    } @else {
+                    <div class="output-placeholder">
+                        <span class="placeholder-icon">💻</span>
+                        <p>Run your code to see the output here</p>
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
     </div>
 </div>

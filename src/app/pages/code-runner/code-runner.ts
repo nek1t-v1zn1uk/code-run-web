@@ -1,6 +1,8 @@
 import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChild, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import * as monaco from 'monaco-editor';
+import { CodeExecutionService } from './code-execution.service';
 
 type SupportedLanguage = 'c' | 'cpp' | 'python' | 'java' | 'kotlin';
 
@@ -12,7 +14,7 @@ interface LanguageOption {
 
 @Component({
     selector: 'app-code-runner',
-    imports: [CommonModule],
+    imports: [CommonModule, FormsModule],
     templateUrl: './code-runner.html',
     styleUrl: './code-runner.css'
 })
@@ -21,8 +23,12 @@ export class CodeRunner implements OnInit, AfterViewInit, OnDestroy {
 
     private editor?: monaco.editor.IStandaloneCodeEditor;
 
-    protected readonly selectedLanguage = signal<SupportedLanguage>('c');
+    protected readonly selectedLanguage = signal<SupportedLanguage>('python');
     protected readonly code = signal<string>('');
+    protected readonly inputData = signal<string>('');
+    protected readonly output = signal<string>('');
+    protected readonly isLoading = signal<boolean>(false);
+    protected readonly executionStats = signal<{ time: number; memory: number } | null>(null);
 
     protected readonly languages: LanguageOption[] = [
         {
@@ -104,6 +110,8 @@ fun main() {
 `
         }
     ];
+
+    constructor(private codeExecutionService: CodeExecutionService) { }
 
     ngOnInit(): void {
         // Set Monaco Editor environment
@@ -207,10 +215,41 @@ fun main() {
         }
     }
 
-    protected runCode(): void {
-        console.log('Running code:', this.code());
-        // Placeholder for code execution functionality
-        alert('Code execution is not implemented yet. This would send the code to a backend service.');
+    protected async runCode(): Promise<void> {
+        this.isLoading.set(true);
+        this.output.set('');
+        this.executionStats.set(null);
+
+        try {
+            const response = await this.codeExecutionService.executeCode({
+                code: this.code(),
+                input: this.inputData(),
+                language: this.selectedLanguage()
+            }).toPromise();
+
+            if (response) {
+                if (response.status === 'OK') {
+                    this.output.set(response.output || '(No output)');
+                    this.executionStats.set({
+                        time: response.time,
+                        memory: response.memory
+                    });
+                } else {
+                    // Handle errors
+                    let errorMessage = `Status: ${response.status}\n`;
+                    if (response.error) {
+                        errorMessage += response.error;
+                    } else {
+                        errorMessage += response.output || 'Unknown error occurred';
+                    }
+                    this.output.set(errorMessage);
+                }
+            }
+        } catch (error: any) {
+            this.output.set(`Network Error: ${error.message || 'Failed to connect to the server'}`);
+        } finally {
+            this.isLoading.set(false);
+        }
     }
 
     protected clearCode(): void {
@@ -218,5 +257,14 @@ fun main() {
         if (languageOption && this.editor) {
             this.editor.setValue(languageOption.defaultCode);
         }
+    }
+
+    protected clearInput(): void {
+        this.inputData.set('');
+    }
+
+    protected clearOutput(): void {
+        this.output.set('');
+        this.executionStats.set(null);
     }
 }
