@@ -1,0 +1,86 @@
+import { Component, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ProblemsService } from '../../services/problems.service';
+import { Problem } from '../../models/problem.model';
+
+@Component({
+    selector: 'app-problem-detail',
+    imports: [CommonModule],
+    templateUrl: './problem-detail.html',
+    styleUrl: './problem-detail.css'
+})
+export class ProblemDetail implements OnInit {
+    protected readonly problem = signal<Problem | null>(null);
+    protected readonly isLoading = signal<boolean>(true);
+    protected readonly error = signal<string | null>(null);
+
+    constructor(
+        private problemsService: ProblemsService,
+        private route: ActivatedRoute,
+        private router: Router
+    ) { }
+
+    ngOnInit(): void {
+        this.route.params.subscribe(params => {
+            const id = Number(params['id']);
+            if (id) {
+                this.loadProblem(id);
+            }
+        });
+    }
+
+    private loadProblem(id: number): void {
+        this.isLoading.set(true);
+        this.error.set(null);
+
+        this.problemsService.getProblemById(id).subscribe({
+            next: (problem) => {
+                this.problem.set(problem);
+                this.isLoading.set(false);
+            },
+            error: (error) => {
+                console.error('Error loading problem:', error);
+                this.error.set('Problem not found');
+                this.isLoading.set(false);
+            }
+        });
+    }
+
+    protected goBack(): void {
+        this.router.navigate(['/problems']);
+    }
+
+    protected getDifficultyClass(difficulty: string): string {
+        const difficultyMap: { [key: string]: string } = {
+            'VERY_EASY': 'very-easy',
+            'EASY': 'easy',
+            'MEDIUM': 'medium',
+            'HARD': 'hard',
+            'VERY_HARD': 'very-hard'
+        };
+        return difficultyMap[difficulty] || 'medium';
+    }
+
+    protected getDifficultyLabel(difficulty: string): string {
+        const labelMap: { [key: string]: string } = {
+            'VERY_EASY': 'Very Easy',
+            'EASY': 'Easy',
+            'MEDIUM': 'Medium',
+            'HARD': 'Hard',
+            'VERY_HARD': 'Very Hard'
+        };
+        return labelMap[difficulty] || difficulty;
+    }
+
+    protected formatDate(dateString: string): string {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+}

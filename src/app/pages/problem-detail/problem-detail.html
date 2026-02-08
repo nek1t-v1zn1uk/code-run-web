@@ -1,0 +1,98 @@
+<div class="problem-detail-container">
+    @if (isLoading()) {
+    <div class="loading-container">
+        <div class="loading-spinner"></div>
+        <p>Loading problem...</p>
+    </div>
+    } @else if (error()) {
+    <div class="error-container">
+        <span class="error-icon">❌</span>
+        <h2>{{ error() }}</h2>
+        <p>The problem you're looking for doesn't exist or has been removed.</p>
+        <button class="btn btn-primary" (click)="goBack()">
+            <span class="btn-icon">←</span>
+            Back to Problems
+        </button>
+    </div>
+    } @else if (problem()) {
+    <div class="problem-content">
+        <!-- Header with Back Button -->
+        <div class="problem-header">
+            <button class="btn-back" (click)="goBack()">
+                <span class="back-icon">←</span>
+                Back to Problems
+            </button>
+        </div>
+
+        <!-- Problem Title Section -->
+        <div class="title-section">
+            <div class="title-row">
+                <h1 class="problem-title">{{ problem()!.title }}</h1>
+                <span class="difficulty-badge" [class]="getDifficultyClass(problem()!.difficulty)">
+                    {{ getDifficultyLabel(problem()!.difficulty) }}
+                </span>
+            </div>
+
+            <div class="problem-metadata">
+                <span class="meta-item">
+                    <span class="meta-icon">🏷️</span>
+                    Topic: <strong>{{ problem()!.topic.name }}</strong>
+                </span>
+                <span class="meta-item">
+                    <span class="meta-icon">📅</span>
+                    Created: <strong>{{ formatDate(problem()!.createdAt) }}</strong>
+                </span>
+            </div>
+        </div>
+
+        <!-- Problem Statement Section -->
+        <div class="section statement-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span class="section-icon">📝</span>
+                    Problem Statement
+                </h2>
+            </div>
+            <div class="section-content">
+                <p class="statement-text">{{ problem()!.statement }}</p>
+            </div>
+        </div>
+
+        <!-- Constraints Section -->
+        <div class="section constraints-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span class="section-icon">⚙️</span>
+                    Constraints
+                </h2>
+            </div>
+            <div class="section-content">
+                <div class="constraints-grid">
+                    <div class="constraint-item">
+                        <div class="constraint-icon">⏱️</div>
+                        <div class="constraint-details">
+                            <div class="constraint-label">Time Limit</div>
+                            <div class="constraint-value">{{ problem()!.executionTimeLimitMs }} ms</div>
+                        </div>
+                    </div>
+                    <div class="constraint-item">
+                        <div class="constraint-icon">💾</div>
+                        <div class="constraint-details">
+                            <div class="constraint-label">Memory Limit</div>
+                            <div class="constraint-value">{{ problem()!.executionMemoryLimitKb / 1024 }} MB</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Section -->
+        <div class="action-section">
+            <button class="btn btn-primary btn-large">
+                <span class="btn-icon">💻</span>
+                Start Solving
+            </button>
+        </div>
+    </div>
+    }
+</div>
