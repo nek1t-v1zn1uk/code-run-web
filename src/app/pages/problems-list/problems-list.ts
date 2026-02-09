@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ProblemsService } from '../../services/problems.service';
@@ -10,14 +10,17 @@ import { Problem, Topic } from '../../models/problem.model';
     templateUrl: './problems-list.html',
     styleUrl: './problems-list.css'
 })
-export class ProblemsList implements OnInit {
+export class ProblemsList implements OnInit, OnDestroy {
     protected readonly problems = signal<Problem[]>([]);
     protected readonly topics = signal<Topic[]>([]);
     protected readonly isLoading = signal<boolean>(true);
+    protected readonly isLoadingMore = signal<boolean>(false);
     protected readonly selectedTopic = signal<string>('');
     protected readonly selectedDifficulty = signal<string>('');
-    protected readonly selectedSort = signal<string>('newest');
-    protected readonly searchQuery = signal<string>('');
+
+    private nextCursor: string | null = null;
+    private hasNext = true;
+    private readonly pageSize = 20;
 
     constructor(
         private problemsService: ProblemsService,
@@ -25,20 +28,55 @@ export class ProblemsList implements OnInit {
     ) { }
 
     ngOnInit(): void {
-        this.loadProblems();
+        this.loadProblems(true);
         this.loadTopics();
     }
 
-    private loadProblems(): void {
-        this.isLoading.set(true);
-        this.problemsService.getProblems().subscribe({
-            next: (problems) => {
-                this.problems.set(problems);
+    ngOnDestroy(): void {
+        // Cleanup if needed
+    }
+
+    private loadProblems(reset: boolean = false): void {
+        if (reset) {
+            this.isLoading.set(true);
+            this.problems.set([]);
+            this.nextCursor = null;
+            this.hasNext = true;
+        } else {
+            this.isLoadingMore.set(true);
+        }
+
+        const request: any = {
+            limit: this.pageSize
+        };
+
+        // Add filters
+        if (this.selectedDifficulty()) {
+            request.difficulty = this.selectedDifficulty();
+        }
+        if (this.selectedTopic()) {
+            request.topicName = this.selectedTopic();
+        }
+        if (this.nextCursor) {
+            request.cursor = this.nextCursor;
+        }
+
+        this.problemsService.getProblems(request).subscribe({
+            next: (response) => {
+                if (reset) {
+                    this.problems.set(response.content);
+                } else {
+                    this.problems.set([...this.problems(), ...response.content]);
+                }
+                this.hasNext = response.hasNext;
+                this.nextCursor = response.nextCursor;
                 this.isLoading.set(false);
+                this.isLoadingMore.set(false);
             },
             error: (error) => {
                 console.error('Error loading problems:', error);
                 this.isLoading.set(false);
+                this.isLoadingMore.set(false);
             }
         });
     }
@@ -54,74 +92,33 @@ export class ProblemsList implements OnInit {
         });
     }
 
-    protected onSearchInput(event: Event): void {
-        const input = event.target as HTMLInputElement;
-        this.searchQuery.set(input.value);
-    }
-
     protected onTopicChange(event: Event): void {
         const select = event.target as HTMLSelectElement;
         this.selectedTopic.set(select.value);
+        this.loadProblems(true);
     }
 
     protected onDifficultyChange(event: Event): void {
         const select = event.target as HTMLSelectElement;
         this.selectedDifficulty.set(select.value);
+        this.loadProblems(true);
     }
 
-    protected onSortChange(event: Event): void {
-        const select = event.target as HTMLSelectElement;
-        this.selectedSort.set(select.value);
+    @HostListener('window:scroll')
+    onScroll(): void {
+        const scrollPosition = window.innerHeight + window.scrollY;
+        const documentHeight = document.documentElement.scrollHeight;
+
+        // Load more when user is 200px from bottom
+        if (scrollPosition >= documentHeight - 200) {
+            this.loadMoreProblems();
+        }
     }
 
-    protected get filteredProblems(): Problem[] {
-        let filtered = [...this.problems()];
-
-        // Apply search filter
-        const search = this.searchQuery().toLowerCase().trim();
-        if (search) {
-            filtered = filtered.filter(p =>
-                p.title.toLowerCase().includes(search)
-            );
+    private loadMoreProblems(): void {
+        if (!this.isLoading() && !this.isLoadingMore() && this.hasNext) {
+            this.loadProblems(false);
         }
-
-        // Apply topic filter
-        const selectedTopic = this.selectedTopic();
-        if (selectedTopic) {
-            filtered = filtered.filter(p => p.topic.name === selectedTopic);
-        }
-
-        // Apply difficulty filter
-        const selectedDifficulty = this.selectedDifficulty();
-        if (selectedDifficulty) {
-            filtered = filtered.filter(p => p.difficulty === selectedDifficulty);
-        }
-
-        // Apply sorting
-        const sort = this.selectedSort();
-        filtered.sort((a, b) => {
-            switch (sort) {
-                case 'newest':
-                    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-                case 'oldest':
-                    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-                case 'difficulty':
-                    const difficultyOrder = {
-                        'VERY_EASY': 1,
-                        'EASY': 2,
-                        'MEDIUM': 3,
-                        'HARD': 4,
-                        'VERY_HARD': 5
-                    };
-                    return difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty];
-                case 'title':
-                    return a.title.localeCompare(b.title);
-                default:
-                    return 0;
-            }
-        });
-
-        return filtered;
     }
 
     protected navigateToProblem(id: number): void {

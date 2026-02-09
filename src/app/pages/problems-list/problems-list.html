@@ -7,14 +7,8 @@
         <p class="subtitle">Browse and solve competitive programming problems</p>
     </header>
 
-    <!-- Search and Filter Controls -->
+    <!-- Filter Controls -->
     <div class="controls">
-        <div class="search-wrapper">
-            <span class="search-icon">🔍</span>
-            <input type="text" class="search-input" placeholder="Search problems by title..." [value]="searchQuery()"
-                (input)="onSearchInput($event)" />
-        </div>
-
         <div class="filters-group">
             <div class="filter-item">
                 <label class="filter-label">
@@ -43,19 +37,6 @@
                     <option value="VERY_HARD">Very Hard</option>
                 </select>
             </div>
-
-            <div class="filter-item">
-                <label class="filter-label">
-                    <span class="label-icon">📊</span>
-                    Sort By
-                </label>
-                <select class="filter-select" [value]="selectedSort()" (change)="onSortChange($event)">
-                    <option value="newest">Newest First</option>
-                    <option value="oldest">Oldest First</option>
-                    <option value="difficulty">Difficulty</option>
-                    <option value="title">Title</option>
-                </select>
-            </div>
         </div>
     </div>
 
@@ -66,7 +47,7 @@
             <div class="loading-spinner"></div>
             <p>Loading problems...</p>
         </div>
-        } @else if (filteredProblems.length === 0) {
+        } @else if (problems().length === 0) {
         <div class="empty-state">
             <span class="empty-icon">📭</span>
             <h2>No problems found</h2>
@@ -74,7 +55,7 @@
         </div>
         } @else {
         <div class="problems-grid">
-            @for (problem of filteredProblems; track problem.id) {
+            @for (problem of problems(); track problem.id) {
             <div class="problem-card" (click)="navigateToProblem(problem.id)">
                 <div class="card-header">
                     <h3 class="problem-title">{{ problem.title }}</h3>
@@ -112,6 +93,14 @@
             </div>
             }
         </div>
+
+        <!-- Loading More Indicator -->
+        @if (isLoadingMore()) {
+        <div class="loading-more">
+            <div class="loading-spinner-small"></div>
+            <p>Loading more problems...</p>
+        </div>
+        }
         }
     </div>
 </div>
