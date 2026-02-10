@@ -54,7 +54,7 @@
                 </h2>
             </div>
             <div class="section-content">
-                <p class="statement-text">{{ problem()!.statement }}</p>
+                <div class="statement-text markdown-content" [innerHTML]="statementHtml()"></div>
             </div>
         </div>
 

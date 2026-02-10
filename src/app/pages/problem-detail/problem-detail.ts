@@ -3,6 +3,15 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProblemsService } from '../../services/problems.service';
 import { Problem } from '../../models/problem.model';
+import { marked } from 'marked';
+import markedKatex from 'marked-katex-extension';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+
+// Configure marked with KaTeX extension
+marked.use(markedKatex({
+    throwOnError: false,
+    output: 'html'
+}));
 
 @Component({
     selector: 'app-problem-detail',
@@ -14,11 +23,13 @@ export class ProblemDetail implements OnInit {
     protected readonly problem = signal<Problem | null>(null);
     protected readonly isLoading = signal<boolean>(true);
     protected readonly error = signal<string | null>(null);
+    protected readonly statementHtml = signal<SafeHtml>('');
 
     constructor(
         private problemsService: ProblemsService,
         private route: ActivatedRoute,
-        private router: Router
+        private router: Router,
+        private sanitizer: DomSanitizer
     ) { }
 
     ngOnInit(): void {
@@ -37,6 +48,9 @@ export class ProblemDetail implements OnInit {
         this.problemsService.getProblemById(id).subscribe({
             next: (problem) => {
                 this.problem.set(problem);
+                // Parse markdown statement and sanitize HTML
+                const htmlContent = marked.parse(problem.statement) as string;
+                this.statementHtml.set(this.sanitizer.bypassSecurityTrustHtml(htmlContent));
                 this.isLoading.set(false);
             },
             error: (error) => {
