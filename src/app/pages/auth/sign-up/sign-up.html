@@ -1,0 +1,105 @@
+<div class="auth-container">
+  <div class="premium-card auth-card">
+    <div class="auth-header">
+      <h1>Create Account</h1>
+      <p>Join the community of elite coders</p>
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input 
+            type="text" 
+            id="firstName" 
+            formControlName="first_name" 
+            class="premium-input" 
+            placeholder="John"
+            [class.invalid]="isFieldInvalid('first_name')"
+          >
+          @if (isFieldInvalid('first_name')) {
+            <div class="error-message">
+              @if (registerForm.get('first_name')?.errors?.['required']) { First name is required }
+              @if (registerForm.get('first_name')?.errors?.['minlength']) { At least 1 character }
+              @if (registerForm.get('first_name')?.errors?.['maxlength']) { Max 32 characters }
+            </div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="lastName">Last Name (Optional)</label>
+          <input 
+            type="text" 
+            id="lastName" 
+            formControlName="last_name" 
+            class="premium-input" 
+            placeholder="Doe"
+            [class.invalid]="isFieldInvalid('last_name')"
+          >
+          @if (isFieldInvalid('last_name')) {
+            <div class="error-message">
+              @if (registerForm.get('last_name')?.errors?.['minlength']) { At least 1 character }
+              @if (registerForm.get('last_name')?.errors?.['maxlength']) { Max 32 characters }
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input 
+          type="email" 
+          id="email" 
+          formControlName="email" 
+          class="premium-input" 
+          placeholder="name@example.com"
+          [class.invalid]="isFieldInvalid('email')"
+        >
+        @if (isFieldInvalid('email')) {
+          <div class="error-message">
+            @if (registerForm.get('email')?.errors?.['required']) { Email is required }
+            @if (registerForm.get('email')?.errors?.['email']) { Invalid email format }
+            @if (registerForm.get('email')?.errors?.['maxlength']) { Max 255 characters }
+          </div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          formControlName="password" 
+          class="premium-input" 
+          placeholder="••••••••"
+          [class.invalid]="isFieldInvalid('password')"
+        >
+        @if (isFieldInvalid('password')) {
+          <div class="error-message">
+            @if (registerForm.get('password')?.errors?.['required']) { Password is required }
+            @if (registerForm.get('password')?.errors?.['minlength']) { At least 8 characters }
+            @if (registerForm.get('password')?.errors?.['maxlength']) { Max 255 characters }
+          </div>
+        }
+      </div>
+
+      @if (errorMessage()) {
+        <div class="global-error">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <button type="submit" class="premium-button" [disabled]="registerForm.invalid || isLoading()">
+        @if (isLoading()) {
+          <span class="loader"></span>
+        } @else {
+          Create Account
+        }
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>Already have an account? <a routerLink="/sign-in">Sign In</a></p>
+    </div>
+  </div>
+</div>

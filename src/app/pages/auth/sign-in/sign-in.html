@@ -1,0 +1,67 @@
+<div class="auth-container">
+  <div class="premium-card auth-card">
+    <div class="auth-header">
+      <h1>Welcome Back</h1>
+      <p>Sign in to continue your coding journey</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input 
+          type="email" 
+          id="email" 
+          formControlName="email" 
+          class="premium-input" 
+          placeholder="name@example.com"
+          [class.invalid]="isFieldInvalid('email')"
+        >
+        @if (isFieldInvalid('email')) {
+          <div class="error-message">
+            @if (loginForm.get('email')?.errors?.['required']) { Email is required }
+            @if (loginForm.get('email')?.errors?.['email']) { Please enter a valid email }
+            @if (loginForm.get('email')?.errors?.['minlength']) { At least 1 character }
+            @if (loginForm.get('email')?.errors?.['maxlength']) { Max 255 characters }
+          </div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          formControlName="password" 
+          class="premium-input" 
+          placeholder="••••••••"
+          [class.invalid]="isFieldInvalid('password')"
+        >
+        @if (isFieldInvalid('password')) {
+          <div class="error-message">
+            @if (loginForm.get('password')?.errors?.['required']) { Password is required }
+            @if (loginForm.get('password')?.errors?.['minlength']) { Password must be at least 8 characters }
+            @if (loginForm.get('password')?.errors?.['maxlength']) { Max 255 characters }
+          </div>
+        }
+      </div>
+
+      @if (errorMessage()) {
+        <div class="global-error">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <button type="submit" class="premium-button" [disabled]="loginForm.invalid || isLoading()">
+        @if (isLoading()) {
+          <span class="loader"></span>
+        } @else {
+          Sign In
+        }
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>Don't have an account? <a routerLink="/sign-up">Sign Up</a></p>
+    </div>
+  </div>
+</div>
