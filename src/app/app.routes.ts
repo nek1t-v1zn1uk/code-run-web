@@ -2,6 +2,10 @@ import { Routes } from '@angular/router';
 
 export const routes: Routes = [
     {
+        path: '',
+        loadComponent: () => import('./pages/problems-list/problems-list').then(m => m.ProblemsList)
+    },
+    {
         path: 'sign-in',
         loadComponent: () => import('./pages/auth/sign-in/sign-in').then(m => m.SignIn)
     },
@@ -14,17 +18,24 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/code-runner/code-runner').then(m => m.CodeRunner)
     },
     {
-        path: 'problems',
-        loadComponent: () => import('./pages/problems-list/problems-list').then(m => m.ProblemsList)
+        path: 'admin/problems',
+        loadComponent: () => import('./pages/admin/problems-list/problems-list').then(m => m.AdminProblemsList)
+    },
+    {
+        path: 'admin/problems/new',
+        loadComponent: () => import('./pages/admin/problem-editor/problem-editor').then(m => m.ProblemEditor)
+    },
+    {
+        path: 'admin/problems/:id',
+        loadComponent: () => import('./pages/admin/problem-editor/problem-editor').then(m => m.ProblemEditor)
     },
     {
         path: 'problems/:id',
         loadComponent: () => import('./pages/problem-detail/problem-detail').then(m => m.ProblemDetail)
     },
     {
-        path: '',
-        redirectTo: 'code-runner',
-        pathMatch: 'full'
+        path: '**',
+        redirectTo: ''
     }
 ];
 

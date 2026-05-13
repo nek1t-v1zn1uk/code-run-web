@@ -1,0 +1,137 @@
+.admin-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.header h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(to right, #fff, var(--text-muted));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.create-btn {
+  width: auto;
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filters {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filter-group label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.filter-group select, .filter-group input {
+  background: var(--bg-dark);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  outline: none;
+}
+
+.problems-table {
+  overflow-x: auto;
+  padding: 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9375rem;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+.difficulty-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.difficulty-badge.very_easy { background: rgba(34, 197, 94, 0.1); color: #4ade80; }
+.difficulty-badge.easy { background: rgba(34, 197, 94, 0.1); color: #4ade80; }
+.difficulty-badge.medium { background: rgba(234, 179, 8, 0.1); color: #facc15; }
+.difficulty-badge.hard { background: rgba(239, 68, 68, 0.1); color: #f87171; }
+.difficulty-badge.very_hard { background: rgba(239, 68, 68, 0.1); color: #f87171; }
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.action-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  background: var(--border);
+}
+
+.action-btn.delete:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: var(--error);
+  color: var(--error);
+}
+
+.loading-spinner, .empty-state {
+  padding: 3rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.pagination {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+}

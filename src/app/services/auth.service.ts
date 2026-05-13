@@ -14,7 +14,7 @@ import {
 })
 export class AuthService {
   private http = inject(HttpClient);
-  private baseUrl = `${environment.serverUrl}/api/v1/auth`;
+  private baseUrl = `${environment.apiUrl}/v1/auth`;
   private readonly TOKEN_KEY = 'access_token';
   private readonly EMAIL_KEY = 'user_email';
 
