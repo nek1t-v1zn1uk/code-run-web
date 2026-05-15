@@ -25,14 +25,14 @@ export interface ProblemTopic {
 export interface Problem {
     id: number;
     title: string;
-    topic: Topic;
+    topic: Topic | null;
     difficulty: Difficulty;
     statement: string;
-    executionTimeLimitMs: number;
-    executionMemoryLimitKb: number;
-    defaultEvaluationType: string;
-    defaultScriptCheckerId: number | null;
-    createdAt: string;
+    execution_time_limit_ms: number;
+    execution_memory_limit_kb: number;
+    default_evaluation_type: string;
+    default_script_checker_id: number | null;
+    created_at: string;
 }
 
 export interface ProblemsRequest {

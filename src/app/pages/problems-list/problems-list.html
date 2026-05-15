@@ -68,15 +68,15 @@
                     <div class="problem-meta">
                         <span class="meta-item">
                             <span class="meta-icon">🏷️</span>
-                            {{ problem.topic.name }}
+                            {{ problem.topic?.name || 'N/A' }}
                         </span>
                         <span class="meta-item">
                             <span class="meta-icon">⏱️</span>
-                            {{ problem.executionTimeLimitMs }}ms
+                            {{ problem.execution_time_limit_ms }}ms
                         </span>
                         <span class="meta-item">
                             <span class="meta-icon">💾</span>
-                            {{ problem.executionMemoryLimitKb / 1024 }}MB
+                            {{ problem.execution_memory_limit_kb / 1024 }}MB
                         </span>
                     </div>
                 </div>
@@ -84,7 +84,7 @@
                 <div class="card-footer">
                     <span class="created-date">
                         <span class="date-icon">📅</span>
-                        {{ formatDate(problem.createdAt) }}
+                        {{ formatDate(problem.created_at) }}
                     </span>
                     <span class="view-arrow">→</span>
                 </div>

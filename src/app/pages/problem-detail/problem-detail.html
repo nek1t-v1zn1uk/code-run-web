@@ -36,11 +36,11 @@
             <div class="problem-metadata">
                 <span class="meta-item">
                     <span class="meta-icon">🏷️</span>
-                    Topic: <strong>{{ problem()!.topic.name }}</strong>
+                    Topic: <strong>{{ problem()!.topic?.name || 'None' }}</strong>
                 </span>
                 <span class="meta-item">
                     <span class="meta-icon">📅</span>
-                    Created: <strong>{{ formatDate(problem()!.createdAt) }}</strong>
+                    Created: <strong>{{ formatDate(problem()!.created_at) }}</strong>
                 </span>
             </div>
         </div>
@@ -72,14 +72,14 @@
                         <div class="constraint-icon">⏱️</div>
                         <div class="constraint-details">
                             <div class="constraint-label">Time Limit</div>
-                            <div class="constraint-value">{{ problem()!.executionTimeLimitMs }} ms</div>
+                            <div class="constraint-value">{{ problem()!.execution_time_limit_ms }} ms</div>
                         </div>
                     </div>
                     <div class="constraint-item">
                         <div class="constraint-icon">💾</div>
                         <div class="constraint-details">
                             <div class="constraint-label">Memory Limit</div>
-                            <div class="constraint-value">{{ problem()!.executionMemoryLimitKb / 1024 }} MB</div>
+                            <div class="constraint-value">{{ problem()!.execution_memory_limit_kb / 1024 }} MB</div>
                         </div>
                     </div>
                 </div>
