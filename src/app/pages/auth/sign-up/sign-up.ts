@@ -31,6 +31,7 @@ export class SignUp {
 
   isLoading = signal(false);
   errorMessage = signal('');
+  showPassword = signal(false);
 
   isFieldInvalid(fieldName: string): boolean {
     const field = this.registerForm.get(fieldName);

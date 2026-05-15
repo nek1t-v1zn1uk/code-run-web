@@ -29,6 +29,7 @@ export class SignIn {
 
   isLoading = signal(false);
   errorMessage = signal('');
+  showPassword = signal(false);
 
   isFieldInvalid(fieldName: string): boolean {
     const field = this.loginForm.get(fieldName);

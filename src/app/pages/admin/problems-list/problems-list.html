@@ -1,75 +1,112 @@
 <div class="admin-container">
   <div class="header">
-    <h1>Admin Panel: Problems</h1>
-    <button class="premium-button create-btn" (click)="onCreateProblem()">
-      <span class="plus-icon">+</span> Create Problem
+    <div class="header-title">
+      <h1 class="gradient-text">Manage Problems</h1>
+      <p class="subtitle">Create and edit coding challenges</p>
+    </div>
+    <button class="create-btn" (click)="onCreateProblem()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      Create New Problem
     </button>
   </div>
 
-  <div class="filters premium-card">
+  <div class="dashboard-controls premium-glass">
+    <div class="search-box">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" [(ngModel)]="searchTitle" (input)="onSearchChange()" placeholder="Search by title...">
+    </div>
+    
     <div class="filter-group">
       <label>Difficulty</label>
-      <select [(ngModel)]="filters.difficulty" (change)="loadProblems()">
-        <option [ngValue]="null">All</option>
+      <select [(ngModel)]="selectedDifficulty" (change)="onSearchChange()" class="glass-select">
+        <option [ngValue]="null">All Difficulties</option>
         @for (diff of difficulties; track diff) {
-          <option [value]="diff">{{ formatDifficulty(diff) }}</option>
+          <option [ngValue]="diff">{{ diff | titlecase }}</option>
         }
       </select>
     </div>
+
     <div class="filter-group">
       <label>Topic</label>
-      <select [(ngModel)]="filters.topicName" (change)="loadProblems()">
-        <option [ngValue]="null">All Topics</option>
-        @for (topic of topics(); track topic.name) {
-          <option [value]="topic.name">{{ topic.name }}</option>
-        }
-      </select>
+      <input type="text" [(ngModel)]="selectedTopic" (input)="onSearchChange()" placeholder="Filter by topic...">
     </div>
   </div>
 
-  <div class="problems-table premium-card">
+  <div class="table-container premium-glass">
     @if (isLoading()) {
-      <div class="loading-spinner">Loading...</div>
-    } @else if (problems().length === 0) {
-      <div class="empty-state">No problems found.</div>
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading problems...</p>
+      </div>
+    } @else if (problems.length === 0) {
+      <div class="empty-state">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="8" y1="12" x2="16" y2="12"></line>
+        </svg>
+        <p>No problems found. Start by creating one!</p>
+      </div>
     } @else {
       <table>
         <thead>
           <tr>
-            <th>ID</th>
             <th>Title</th>
-            <th>Topic</th>
             <th>Difficulty</th>
-            <th>Created At</th>
+            <th>Topic</th>
+            <th>Evaluation</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          @for (problem of problems(); track problem.id) {
+          @for (problem of problems; track problem.id) {
             <tr>
-              <td>{{ problem.id }}</td>
-              <td>{{ problem.title }}</td>
-              <td>{{ problem.topic?.name || 'None' }}</td>
+              <td>
+                <div class="problem-title-cell">
+                  <span class="title-text">{{ problem.title }}</span>
+                  @if (problem.created_at) {
+                    <span class="created-at">{{ problem.created_at | date:'shortDate' }}</span>
+                  }
+                </div>
+              </td>
               <td>
                 <span class="difficulty-badge" [class]="problem.difficulty.toLowerCase()">
-                  {{ formatDifficulty(problem.difficulty) }}
+                  {{ problem.difficulty.replace('_', ' ') }}
                 </span>
               </td>
-              <td>{{ problem.created_at | date:'short' }}</td>
-              <td class="actions">
-                <button class="action-btn edit" (click)="onEdit(problem.id)">Edit</button>
-                <button class="action-btn delete" (click)="onDelete(problem.id)">Delete</button>
+              <td>
+                <span class="topic-tag">{{ problem.topic || 'General' }}</span>
+              </td>
+              <td>
+                <span class="eval-type">{{ problem.evaluation_type.replace('_', ' ') }}</span>
+              </td>
+              <td>
+                <div class="actions">
+                  <button class="action-btn edit" (click)="onEditProblem(problem.id)" title="Edit">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                  </button>
+                  <button class="action-btn delete" (click)="onDeleteProblem(problem.id)" title="Delete">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                  </button>
+                </div>
               </td>
             </tr>
           }
         </tbody>
       </table>
+
+      @if (hasNext()) {
+        <div class="pagination">
+          <button class="load-more-btn" (click)="loadMore()" [disabled]="isLoading()">
+            {{ isLoading() ? 'Loading...' : 'Load More Problems' }}
+          </button>
+        </div>
+      }
     }
   </div>
-
-  @if (hasNext()) {
-    <div class="pagination">
-      <button class="premium-button" (click)="loadMore()">Load More</button>
-    </div>
-  }
 </div>

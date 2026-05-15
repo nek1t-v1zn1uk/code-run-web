@@ -1,192 +1,255 @@
 <div class="editor-container">
-  <div class="header">
-    <button class="back-btn" (click)="goBack()">← Back</button>
-    <h1>{{ isEditMode ? 'Edit Problem' : 'Create Problem' }}</h1>
-    <button class="premium-button save-btn" [disabled]="isSaving()" (click)="onSave()">
-      @if (isSaving()) { Saving... } @else { Save Problem }
+  <div class="editor-header">
+    <div class="header-left">
+      <button class="back-btn" (click)="goBack()" title="Back to Problems">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+      </button>
+      <div class="header-info">
+        <h1 class="gradient-text">{{ isEditMode ? 'Edit Problem' : 'Create Problem' }}</h1>
+        <p class="subtitle">{{ isEditMode ? 'Problem ID: #' + problemId : 'Define new challenge' }}</p>
+      </div>
+    </div>
+    <button class="save-btn" [disabled]="isSaving()" (click)="onSave()">
+      @if (isSaving()) {
+        <span class="spinner-small"></span>
+        Saving...
+      } @else {
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+        Save Changes
+      }
     </button>
   </div>
 
-  <div class="tabs">
-    <button [class.active]="activeTab === 'info'" (click)="activeTab = 'info'">Info</button>
-    <button [class.active]="activeTab === 'tests'" (click)="activeTab = 'tests'">Tests ({{ tests.length }})</button>
-    <button [class.active]="activeTab === 'checkers'" (click)="activeTab = 'checkers'">Script Checkers ({{ checkers.length }})</button>
-  </div>
+  <div class="editor-layout">
+    <aside class="editor-sidebar premium-glass">
+      <nav class="tabs-nav">
+        <button [class.active]="activeTab === 'info'" (click)="activeTab = 'info'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          General Info
+        </button>
+        <button [class.active]="activeTab === 'tests'" (click)="activeTab = 'tests'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          Tests ({{ tests.length }})
+        </button>
+        <button [class.active]="activeTab === 'checkers'" (click)="activeTab = 'checkers'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+          Checkers ({{ checkers.length }})
+        </button>
+      </nav>
+    </aside>
 
-  <div class="tab-content premium-card">
-    <!-- INFO TAB -->
-    @if (activeTab === 'info') {
-      <div class="info-editor" [formGroup]="problemForm">
-        <div class="form-row">
-          <div class="form-group">
-            <label>Title</label>
-            <input type="text" formControlName="title" class="premium-input" placeholder="Problem title">
-          </div>
-          <div class="form-group">
-            <label>Difficulty</label>
-            <select formControlName="difficulty" class="premium-input">
-              @for (diff of difficulties; track diff) {
-                <option [value]="diff">{{ diff }}</option>
-              }
-            </select>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Topic (Optional)</label>
-            <select formControlName="topic" class="premium-input">
-              <option [ngValue]="null">No Topic</option>
-              @for (t of topics; track t.id) {
-                <option [value]="t.name">{{ t.name }}</option>
-              }
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Evaluation Type</label>
-            <select formControlName="default_evaluation_type" class="premium-input">
-              @for (type of evaluationTypes; track type) {
-                <option [value]="type">{{ type }}</option>
-              }
-            </select>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Time Limit (ms)</label>
-            <input type="number" formControlName="execution_time_limit_ms" class="premium-input">
-          </div>
-          <div class="form-group">
-            <label>Memory Limit (Kb)</label>
-            <input type="number" formControlName="execution_memory_limit_kb" class="premium-input">
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Default Script Checker</label>
-          <select formControlName="default_script_checker_id" class="premium-input">
-            <option [ngValue]="null">None</option>
-            @for (checker of checkers; track $index) {
-              <option [ngValue]="checker.id">{{ checker.name }}</option>
-            }
-          </select>
-        </div>
-
-        <div class="statement-editor">
-          <label>Statement (Markdown)</label>
-          <div class="md-split">
-            <textarea formControlName="statement" (input)="updatePreview()" placeholder="Describe the problem..."></textarea>
-            <div class="md-preview markdown-content" [innerHTML]="previewHtml()"></div>
-          </div>
-        </div>
-      </div>
-    }
-
-    <!-- TESTS TAB -->
-    @if (activeTab === 'tests') {
-      <div class="tests-list">
-        <div class="test-header">
-          <h3>Problem Tests</h3>
-          <button class="premium-button add-btn" (click)="addTest()">+ Add Test</button>
-        </div>
-
-        <div class="tests-grid">
-          @for (test of tests; track test.tempId || test.id; let i = $index) {
-            <div class="test-item" [class.selected]="selectedTest === test">
-              <div class="test-summary" (click)="selectTest(test)">
-                <span class="ordinal">#{{ i + 1 }}</span>
-                <span class="type">{{ test.is_example ? 'Example' : 'Test' }}</span>
-                <div class="test-actions">
-                  <button (click)="moveTest(i, -1); $event.stopPropagation()" [disabled]="i === 0">↑</button>
-                  <button (click)="moveTest(i, 1); $event.stopPropagation()" [disabled]="i === tests.length - 1">↓</button>
-                  <button class="delete-btn" (click)="deleteTest(i); $event.stopPropagation()">×</button>
-                </div>
+    <main class="editor-main premium-glass">
+      <!-- INFO TAB -->
+      @if (activeTab === 'info') {
+        <div class="tab-pane" [formGroup]="problemForm">
+          <section class="form-section">
+            <h3 class="section-title">Identity & Rules</h3>
+            <div class="form-grid">
+              <div class="form-group span-2">
+                <label>Problem Title</label>
+                <input type="text" formControlName="title" class="glass-input" placeholder="Enter title...">
               </div>
-            </div>
-          }
-        </div>
-
-        @if (selectedTest) {
-          <div class="test-details premium-card">
-            <h4>Test #{{ tests.indexOf(selectedTest) + 1 }} Details</h4>
-            <div class="form-row">
-              <label class="checkbox-label">
-                <input type="checkbox" [(ngModel)]="selectedTest.is_example"> Is Example
-              </label>
-            </div>
-            <div class="form-group">
-              <label>Input Data</label>
-              <textarea [(ngModel)]="selectedTest.input_data" rows="3"></textarea>
-            </div>
-            <div class="form-group">
-              <label>Expected Output</label>
-              <textarea [(ngModel)]="selectedTest.expected_output" rows="3"></textarea>
-            </div>
-            <div class="form-row">
               <div class="form-group">
-                <label>Override Eval Type</label>
-                <select [(ngModel)]="selectedTest.override_evaluation_type">
-                  <option [ngValue]="null">Use Default</option>
-                  @for (type of evaluationTypes; track type) {
-                    <option [value]="type">{{ type }}</option>
+                <label>Difficulty</label>
+                <select formControlName="difficulty" class="glass-select">
+                  @for (diff of difficulties; track diff) {
+                    <option [value]="diff">{{ diff.replace('_', ' ') | titlecase }}</option>
                   }
                 </select>
               </div>
               <div class="form-group">
-                <label>Override Script Checker</label>
-                <select [(ngModel)]="selectedTest.override_script_checker_id">
-                  <option [ngValue]="null">Use Default</option>
+                <label>Topic</label>
+                <select formControlName="topic" class="glass-select">
+                  <option [ngValue]="null">General / No Topic</option>
+                  @for (t of topics; track t.id) {
+                    <option [value]="t.name">{{ t.name }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <section class="form-section">
+            <h3 class="section-title">Resources & Evaluation</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Time Limit (ms)</label>
+                <input type="number" formControlName="execution_time_limit_ms" class="glass-input">
+              </div>
+              <div class="form-group">
+                <label>Memory Limit (Kb)</label>
+                <input type="number" formControlName="execution_memory_limit_kb" class="glass-input">
+              </div>
+              <div class="form-group">
+                <label>Evaluation Logic</label>
+                <select formControlName="default_evaluation_type" class="glass-select">
+                  @for (type of evaluationTypes; track type) {
+                    <option [value]="type">{{ type.replace('_', ' ') | titlecase }}</option>
+                  }
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Default Checker</label>
+                <select formControlName="default_script_checker_id" class="glass-select">
+                  <option [ngValue]="null">None / Standard Output</option>
                   @for (checker of checkers; track $index) {
                     <option [ngValue]="checker.id">{{ checker.name }}</option>
                   }
                 </select>
               </div>
             </div>
-          </div>
-        }
-      </div>
-    }
+          </section>
 
-    <!-- CHECKERS TAB -->
-    @if (activeTab === 'checkers') {
-      <div class="checkers-list">
-        <div class="checker-header">
-          <h3>Script Checkers</h3>
-          <button class="premium-button add-btn" (click)="addChecker()">+ Add Checker</button>
-        </div>
-
-        <div class="checkers-grid">
-          @for (checker of checkers; track $index; let i = $index) {
-            <div class="checker-item" [class.selected]="selectedChecker === checker" (click)="selectChecker(checker)">
-              <span class="checker-name">{{ checker.name || 'Unnamed Checker' }}</span>
-              <span class="checker-lang">{{ checker.language }}</span>
-              <button class="delete-btn" (click)="deleteChecker(i); $event.stopPropagation()">×</button>
+          <section class="form-section statement-section">
+            <h3 class="section-title">Problem Statement (Markdown)</h3>
+            <div class="md-editor-container">
+              <div class="editor-toolbar">
+                <span>Editor</span>
+                <span>Preview</span>
+              </div>
+              <div class="md-split">
+                <textarea formControlName="statement" (input)="updatePreview()" placeholder="Use Markdown to describe the task..."></textarea>
+                <div class="md-preview markdown-content" [innerHTML]="previewHtml()"></div>
+              </div>
             </div>
-          }
+          </section>
         </div>
+      }
 
-        @if (selectedChecker) {
-          <div class="checker-details premium-card">
-            <div class="form-group">
-              <label>Checker Name</label>
-              <input type="text" [(ngModel)]="selectedChecker.name" class="premium-input">
-            </div>
-            <div class="form-group">
-              <label>Language</label>
-              <select [(ngModel)]="selectedChecker.language" class="premium-input">
-                @for (lang of availableLangs; track lang) {
-                  <option [value]="lang">{{ lang }}</option>
+      <!-- TESTS TAB -->
+      @if (activeTab === 'tests') {
+        <div class="tab-pane tests-pane">
+          <div class="master-detail-layout">
+            <div class="master-list">
+              <div class="pane-header">
+                <h3>Test Cases</h3>
+                <button class="add-btn-small" (click)="addTest()" title="Add Test Case">+</button>
+              </div>
+              <div class="scroll-list">
+                @for (test of tests; track test.tempId || test.id; let i = $index) {
+                  <div class="test-card" [class.active]="selectedTest === test" (click)="selectTest(test)">
+                    <div class="card-info">
+                      <span class="ordinal">#{{ i + 1 }}</span>
+                      <span class="badge" [class.example]="test.is_example">{{ test.is_example ? 'Example' : 'Test' }}</span>
+                    </div>
+                    <div class="card-actions">
+                      <button (click)="moveTest(i, -1); $event.stopPropagation()" [disabled]="i === 0">↑</button>
+                      <button (click)="moveTest(i, 1); $event.stopPropagation()" [disabled]="i === tests.length - 1">↓</button>
+                      <button class="delete-btn" (click)="deleteTest(i); $event.stopPropagation()">×</button>
+                    </div>
+                  </div>
                 }
-              </select>
+              </div>
             </div>
-            <div class="editor-box">
-              <label>Code (Monaco)</label>
-              <div #checkerEditor class="monaco-box"></div>
+
+            <div class="detail-view">
+              @if (selectedTest) {
+                <div class="detail-card">
+                  <h4 class="detail-title">Test Case Configuration #{{ tests.indexOf(selectedTest) + 1 }}</h4>
+                  <div class="form-group checkbox-group">
+                    <label class="glass-checkbox">
+                      <input type="checkbox" [(ngModel)]="selectedTest.is_example">
+                      <span class="checkmark"></span>
+                      Include in problem examples
+                    </label>
+                  </div>
+                  <div class="form-grid">
+                    <div class="form-group">
+                      <label>Input Data</label>
+                      <textarea [(ngModel)]="selectedTest.input_data" class="glass-textarea" rows="4" placeholder="Standard input..."></textarea>
+                    </div>
+                    <div class="form-group">
+                      <label>Expected Output</label>
+                      <textarea [(ngModel)]="selectedTest.expected_output" class="glass-textarea" rows="4" placeholder="Standard output..."></textarea>
+                    </div>
+                  </div>
+                  <div class="form-grid">
+                    <div class="form-group">
+                      <label>Override Evaluation</label>
+                      <select [(ngModel)]="selectedTest.override_evaluation_type" class="glass-select">
+                        <option [ngValue]="null">Inherit from Problem</option>
+                        @for (type of evaluationTypes; track type) {
+                          <option [value]="type">{{ type.replace('_', ' ') | titlecase }}</option>
+                        }
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label>Override Checker</label>
+                      <select [(ngModel)]="selectedTest.override_script_checker_id" class="glass-select">
+                        <option [ngValue]="null">Inherit from Problem</option>
+                        @for (checker of checkers; track $index) {
+                          <option [ngValue]="checker.id">{{ checker.name }}</option>
+                        }
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              } @else {
+                <div class="selection-placeholder">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                  <p>Select a test case to configure its data</p>
+                </div>
+              }
             </div>
           </div>
-        }
-      </div>
-    }
+        </div>
+      }
+
+      <!-- CHECKERS TAB -->
+      @if (activeTab === 'checkers') {
+        <div class="tab-pane checkers-pane">
+          <div class="master-detail-layout">
+            <div class="master-list">
+              <div class="pane-header">
+                <h3>Script Checkers</h3>
+                <button class="add-btn-small" (click)="addChecker()" title="Add Checker">+</button>
+              </div>
+              <div class="scroll-list">
+                @for (checker of checkers; track $index; let i = $index) {
+                  <div class="test-card" [class.active]="selectedChecker === checker" (click)="selectChecker(checker)">
+                    <div class="card-info">
+                      <span class="title-text">{{ checker.name || 'Unnamed' }}</span>
+                      <span class="badge lang">{{ checker.language }}</span>
+                    </div>
+                    <button class="delete-btn" (click)="deleteChecker(i); $event.stopPropagation()">×</button>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="detail-view">
+              @if (selectedChecker) {
+                <div class="detail-card">
+                  <h4 class="detail-title">Checker Implementation</h4>
+                  <div class="form-grid">
+                    <div class="form-group">
+                      <label>Checker Name</label>
+                      <input type="text" [(ngModel)]="selectedChecker.name" class="glass-input" placeholder="e.g. Float Comparison">
+                    </div>
+                    <div class="form-group">
+                      <label>Language</label>
+                      <select [(ngModel)]="selectedChecker.language" class="glass-select">
+                        @for (lang of availableLangs; track lang) {
+                          <option [value]="lang">{{ lang | titlecase }}</option>
+                        }
+                      </select>
+                    </div>
+                  </div>
+                  <div class="code-editor-section">
+                    <label>Script Source Code</label>
+                    <div #checkerEditor class="monaco-container"></div>
+                  </div>
+                </div>
+              } @else {
+                <div class="selection-placeholder">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                  <p>Select a script checker to edit its code</p>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </main>
   </div>
 </div>

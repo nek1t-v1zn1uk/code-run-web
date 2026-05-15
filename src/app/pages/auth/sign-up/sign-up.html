@@ -1,99 +1,129 @@
 <div class="auth-container">
-  <div class="premium-card auth-card">
+  <div class="auth-card premium-glass">
     <div class="auth-header">
-      <h1>Create Account</h1>
-      <p>Join the community of elite coders</p>
+      <div class="header-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="glow-icon">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="8.5" cy="7" r="4"></circle>
+          <line x1="20" y1="8" x2="20" y2="14"></line>
+          <line x1="23" y1="11" x2="17" y2="11"></line>
+        </svg>
+      </div>
+      <h1 class="gradient-text">Create Account</h1>
+      <p class="auth-subtitle">Join the community of elite developers</p>
     </div>
 
-    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-form">
       <div class="form-row">
         <div class="form-group">
-          <label for="firstName">First Name</label>
-          <input 
-            type="text" 
-            id="firstName" 
-            formControlName="first_name" 
-            class="premium-input" 
-            placeholder="John"
-            [class.invalid]="isFieldInvalid('first_name')"
-          >
+          <label for="firstName">
+            First Name
+          </label>
+          <div class="input-wrapper">
+            <input 
+              type="text" 
+              id="firstName" 
+              formControlName="first_name" 
+              class="glass-input" 
+              placeholder="John"
+              [class.invalid]="isFieldInvalid('first_name')"
+            >
+            <div class="focus-border"></div>
+          </div>
           @if (isFieldInvalid('first_name')) {
-            <div class="error-message">
-              @if (registerForm.get('first_name')?.errors?.['required']) { First name is required }
-              @if (registerForm.get('first_name')?.errors?.['minlength']) { At least 1 character }
-              @if (registerForm.get('first_name')?.errors?.['maxlength']) { Max 32 characters }
-            </div>
+            <div class="error-feedback">First name is required</div>
           }
         </div>
 
         <div class="form-group">
-          <label for="lastName">Last Name (Optional)</label>
-          <input 
-            type="text" 
-            id="lastName" 
-            formControlName="last_name" 
-            class="premium-input" 
-            placeholder="Doe"
-            [class.invalid]="isFieldInvalid('last_name')"
-          >
-          @if (isFieldInvalid('last_name')) {
-            <div class="error-message">
-              @if (registerForm.get('last_name')?.errors?.['minlength']) { At least 1 character }
-              @if (registerForm.get('last_name')?.errors?.['maxlength']) { Max 32 characters }
-            </div>
-          }
+          <label for="lastName">
+            Last Name (Optional)
+          </label>
+          <div class="input-wrapper">
+            <input 
+              type="text" 
+              id="lastName" 
+              formControlName="last_name" 
+              class="glass-input" 
+              placeholder="Doe"
+            >
+            <div class="focus-border"></div>
+          </div>
         </div>
       </div>
 
       <div class="form-group">
-        <label for="email">Email</label>
-        <input 
-          type="email" 
-          id="email" 
-          formControlName="email" 
-          class="premium-input" 
-          placeholder="name@example.com"
-          [class.invalid]="isFieldInvalid('email')"
-        >
+        <label for="email">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+          Email Address
+        </label>
+        <div class="input-wrapper">
+          <input 
+            type="email" 
+            id="email" 
+            formControlName="email" 
+            class="glass-input" 
+            placeholder="john.doe@example.com"
+            [class.invalid]="isFieldInvalid('email')"
+          >
+          <div class="focus-border"></div>
+        </div>
         @if (isFieldInvalid('email')) {
-          <div class="error-message">
+          <div class="error-feedback">
             @if (registerForm.get('email')?.errors?.['required']) { Email is required }
-            @if (registerForm.get('email')?.errors?.['email']) { Invalid email format }
-            @if (registerForm.get('email')?.errors?.['maxlength']) { Max 255 characters }
+            @if (registerForm.get('email')?.errors?.['email']) { Please enter a valid email }
           </div>
         }
       </div>
 
       <div class="form-group">
-        <label for="password">Password</label>
-        <input 
-          type="password" 
-          id="password" 
-          formControlName="password" 
-          class="premium-input" 
-          placeholder="••••••••"
-          [class.invalid]="isFieldInvalid('password')"
-        >
+        <label for="password">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          Password
+        </label>
+        <div class="input-wrapper">
+          <input 
+            [type]="showPassword() ? 'text' : 'password'" 
+            id="password" 
+            formControlName="password" 
+            class="glass-input" 
+            placeholder="••••••••"
+            [class.invalid]="isFieldInvalid('password')"
+          >
+          <button type="button" class="password-toggle" (click)="showPassword.set(!showPassword())">
+            @if (showPassword()) {
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+            } @else {
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            }
+          </button>
+          <div class="focus-border"></div>
+        </div>
         @if (isFieldInvalid('password')) {
-          <div class="error-message">
+          <div class="error-feedback">
             @if (registerForm.get('password')?.errors?.['required']) { Password is required }
             @if (registerForm.get('password')?.errors?.['minlength']) { At least 8 characters }
-            @if (registerForm.get('password')?.errors?.['maxlength']) { Max 255 characters }
           </div>
         }
       </div>
 
       @if (errorMessage()) {
-        <div class="global-error">
-          {{ errorMessage() }}
+        <div class="alert alert-error">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          <span>{{ errorMessage() }}</span>
         </div>
       }
 
-      <button type="submit" class="premium-button" [disabled]="registerForm.invalid || isLoading()">
+      <button type="submit" class="submit-btn" [disabled]="registerForm.invalid || isLoading()">
+        <span class="btn-content" [class.hidden]="isLoading()">Create Account</span>
         @if (isLoading()) {
-          <span class="loader"></span>
-        } @else {
-          Create Account
+          <span class="btn-loader"></span>
         }
       </button>
     </form>
