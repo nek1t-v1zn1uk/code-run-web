@@ -1,3 +1,5 @@
+export type Difficulty = 'VERY_EASY' | 'EASY' | 'MEDIUM' | 'HARD' | 'VERY_HARD';
+
 export enum ProblemDifficulty {
     VERY_EASY = 'VERY_EASY',
     EASY = 'EASY',
@@ -11,9 +13,40 @@ export enum EvaluationType {
     SCRIPT_CHECK = 'SCRIPT_CHECK'
 }
 
+export interface Topic {
+    name: string;
+}
+
 export interface ProblemTopic {
     id: number;
     name: string;
+}
+
+export interface Problem {
+    id: number;
+    title: string;
+    topic: Topic;
+    difficulty: Difficulty;
+    statement: string;
+    executionTimeLimitMs: number;
+    executionMemoryLimitKb: number;
+    defaultEvaluationType: string;
+    defaultScriptCheckerId: number | null;
+    createdAt: string;
+}
+
+export interface ProblemsRequest {
+    difficulty?: string;
+    topicName?: string;
+    limit: number;
+    cursor?: string;
+}
+
+export interface ProblemsResponse {
+    content: Problem[];
+    hasNext: boolean;
+    nextCursor: string;
+    isEmpty: boolean;
 }
 
 export interface ProblemDto {

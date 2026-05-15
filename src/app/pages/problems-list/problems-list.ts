@@ -1,8 +1,8 @@
 import { Component, OnInit, OnDestroy, HostListener, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { ProblemsService } from '../../services/problems.service';
-import { Problem, Topic } from '../../models/problem.model';
+import { ProblemService } from '../../services/problem.service';
+import { Problem, Topic } from '../../models/problem.models';
 
 @Component({
     selector: 'app-problems-list',
@@ -23,7 +23,7 @@ export class ProblemsList implements OnInit, OnDestroy {
     private readonly pageSize = 20;
 
     constructor(
-        private problemsService: ProblemsService,
+        private problemService: ProblemService,
         private router: Router
     ) { }
 
@@ -61,7 +61,7 @@ export class ProblemsList implements OnInit, OnDestroy {
             request.cursor = this.nextCursor;
         }
 
-        this.problemsService.getProblems(request).subscribe({
+        this.problemService.getProblems(request).subscribe({
             next: (response) => {
                 if (reset) {
                     this.problems.set(response.content);
@@ -82,7 +82,7 @@ export class ProblemsList implements OnInit, OnDestroy {
     }
 
     private loadTopics(): void {
-        this.problemsService.getTopics().subscribe({
+        this.problemService.getTopics().subscribe({
             next: (topics) => {
                 this.topics.set(topics);
             },

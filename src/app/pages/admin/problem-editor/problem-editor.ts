@@ -11,7 +11,7 @@ import * as monaco from 'monaco-editor';
 import { ProblemService } from '../../../services/problem.service';
 import { TestService } from '../../../services/test.service';
 import { ScriptCheckerService } from '../../../services/script-checker.service';
-import { ProblemDifficulty, EvaluationType } from '../../../models/problem.models';
+import { ProblemDifficulty, EvaluationType, ProblemTopic } from '../../../models/problem.models';
 import { NewTestRequest, UpdateTestRequest, DeleteTestRequest, TestDto } from '../../../models/test.models';
 import { ScriptCheckerDto } from '../../../models/script-checker.models';
 
@@ -47,7 +47,7 @@ export class ProblemEditor implements OnInit, AfterViewChecked {
 
   problemForm: FormGroup = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(3)]],
-    topic: [''],
+    topic: [null],
     difficulty: [ProblemDifficulty.MEDIUM, Validators.required],
     statement: ['', [Validators.required, Validators.minLength(10)]],
     execution_time_limit_ms: [1000, [Validators.required, Validators.min(500)]],
@@ -57,6 +57,7 @@ export class ProblemEditor implements OnInit, AfterViewChecked {
   });
 
   previewHtml = signal<SafeHtml>('');
+  topics: ProblemTopic[] = [];
   tests: any[] = [];
   deletedTests: number[] = [];
   checkers: any[] = [];
@@ -67,6 +68,10 @@ export class ProblemEditor implements OnInit, AfterViewChecked {
   isSaving = signal(false);
 
   ngOnInit(): void {
+    this.problemService.getTopics().subscribe(topics => {
+      this.topics = topics;
+    });
+
     const id = this.route.snapshot.params['id'];
     if (id && id !== 'new') {
       this.isEditMode = true;
@@ -89,7 +94,7 @@ export class ProblemEditor implements OnInit, AfterViewChecked {
     this.problemService.getProblemById(this.problemId).subscribe(problem => {
       this.problemForm.patchValue({
         title: problem.title,
-        topic: problem.topic?.name,
+        topic: problem.topic?.name ?? null,
         difficulty: problem.difficulty,
         statement: problem.statement,
         execution_time_limit_ms: problem.execution_time_limit_ms,
@@ -98,16 +103,25 @@ export class ProblemEditor implements OnInit, AfterViewChecked {
         default_script_checker_id: problem.default_script_checker_id
       });
       this.updatePreview();
+
+      // Load the default script checker if one is set
+      if (problem.default_script_checker_id) {
+        this.checkerService.getScriptChecker(problem.default_script_checker_id).subscribe(checker => {
+          this.checkers = [{
+            id: checker.id,
+            name: checker.name,
+            language: typeof checker.language === 'string' ? checker.language : (checker.language as any)?.language ?? 'python',
+            code: checker.code
+          }];
+          // Ensure the dropdown reflects the loaded checker
+          this.problemForm.patchValue({ default_script_checker_id: checker.id });
+        });
+      }
     });
 
     this.testService.getProblemTests(this.problemId).subscribe(tests => {
       this.tests = tests.sort((a, b) => a.ordinal - b.ordinal);
     });
-
-    // In a real app, you might need an endpoint to list all checkers or checkers for a problem
-    // For now, I'll assume script checkers are loaded based on problem or we need another way
-    // The user said "list of script checkers"
-    // I'll add a placeholder to fetch them if possible, or just manage the ones we have.
   }
 
   updatePreview(): void {
@@ -253,11 +267,41 @@ export class ProblemEditor implements OnInit, AfterViewChecked {
     // Delete checkers
     const deleteCheckerOps = this.deletedCheckers.map(id => this.checkerService.deleteScriptChecker(id));
 
-    forkJoin([...checkerOps, ...deleteCheckerOps]).pipe(
+    const allOps = [...checkerOps, ...deleteCheckerOps];
+    const ops$ = allOps.length > 0 ? forkJoin(allOps) : of([]);
+
+    ops$.pipe(
       switchMap(results => {
-        // Update problem default checker ID if it was a new one
-        const updatedProblem = { ...this.problemForm.value };
-        
+        // Backfill IDs into this.checkers from create/update results
+        // results array mirrors checkerOps order (not deleteCheckerOps)
+        const checkerResults = (results as any[]).slice(0, checkerOps.length);
+        checkerResults.forEach((res, i) => {
+          if (res?.id) {
+            this.checkers[i].id = res.id;
+          }
+        });
+
+        // Build clean problem payload — resolve checker ID properly
+        const formVal = this.problemForm.value;
+        let defaultCheckerId: number | null = null;
+
+        // formVal.default_script_checker_id may be undefined (new checker was selected
+        // before it had a real id) — find it by matching tempId/id in this.checkers
+        const formCheckerId = formVal.default_script_checker_id;
+        if (formCheckerId !== null && formCheckerId !== undefined) {
+          // It's already a real numeric id
+          defaultCheckerId = Number(formCheckerId);
+        } else if (formVal.default_evaluation_type === EvaluationType.SCRIPT_CHECK && this.checkers.length > 0) {
+          // Fallback: if eval type is SCRIPT_CHECK but no id resolved, pick first checker
+          defaultCheckerId = this.checkers[0].id ?? null;
+        }
+
+        const updatedProblem = {
+          ...formVal,
+          topic: formVal.topic || null,
+          default_script_checker_id: defaultCheckerId
+        };
+
         // 2. Patch/Create Problem
         if (this.isEditMode) {
           return this.problemService.updateProblem(this.problemId!, updatedProblem);
@@ -290,6 +334,26 @@ export class ProblemEditor implements OnInit, AfterViewChecked {
         }));
 
         const deleteTests: DeleteTestRequest[] = this.deletedTests.map(id => ({ id }));
+
+        // Two-phase update to avoid UNIQUE(problem_id, ordinal) constraint violations.
+        // When reordering, the backend applies UPDATEs sequentially — any swap (e.g. 1↔2)
+        // creates a transient duplicate regardless of ordering.
+        // Phase 1: move existing tests to ordinal+10000 (safe temp range, no real test can be there).
+        // Phase 2: move to final ordinals + handle new/deleted tests.
+        if (updateTests.length > 0) {
+          const tempUpdateTests = updateTests.map(t => ({ id: t.id, ordinal: t.ordinal! + 10000 }));
+          return this.testService.updateTestList(this.problemId!, {
+            new_tests: [],
+            update_tests: tempUpdateTests,
+            delete_tests: []
+          }).pipe(
+            switchMap(() => this.testService.updateTestList(this.problemId!, {
+              new_tests: newTests,
+              update_tests: updateTests,
+              delete_tests: deleteTests
+            }))
+          );
+        }
 
         return this.testService.updateTestList(this.problemId!, {
           new_tests: newTests,

@@ -1,8 +1,8 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ProblemsService } from '../../services/problems.service';
-import { Problem } from '../../models/problem.model';
+import { ProblemService } from '../../services/problem.service';
+import { Problem } from '../../models/problem.models';
 import { marked } from 'marked';
 import markedKatex from 'marked-katex-extension';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -26,7 +26,7 @@ export class ProblemDetail implements OnInit {
     protected readonly statementHtml = signal<SafeHtml>('');
 
     constructor(
-        private problemsService: ProblemsService,
+        private problemService: ProblemService,
         private route: ActivatedRoute,
         private router: Router,
         private sanitizer: DomSanitizer
@@ -45,7 +45,7 @@ export class ProblemDetail implements OnInit {
         this.isLoading.set(true);
         this.error.set(null);
 
-        this.problemsService.getProblemById(id).subscribe({
+        this.problemService.getProblemById<Problem>(id).subscribe({
             next: (problem) => {
                 this.problem.set(problem);
                 // Parse markdown statement and sanitize HTML

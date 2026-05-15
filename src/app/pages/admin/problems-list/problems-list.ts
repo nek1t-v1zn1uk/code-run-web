@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ProblemService } from '../../../services/problem.service';
-import { ProblemDto, ProblemDifficulty } from '../../../models/problem.models';
+import { ProblemDto, ProblemDifficulty, ProblemTopic, ProblemsRequest } from '../../../models/problem.models';
 
 @Component({
   selector: 'app-admin-problems-list',
@@ -22,33 +22,42 @@ export class AdminProblemsList implements OnInit {
   nextCursor = signal<string | null>(null);
 
   difficulties = Object.values(ProblemDifficulty);
+  topics = signal<ProblemTopic[]>([]);
   filters = {
     difficulty: null as ProblemDifficulty | null,
-    topicName: ''
+    topicName: null as string | null
   };
 
   ngOnInit(): void {
+    this.loadTopics();
     this.loadProblems();
+  }
+
+  loadTopics(): void {
+    this.problemService.getTopics().subscribe({
+      next: (topics) => this.topics.set(topics),
+      error: () => {}
+    });
   }
 
   loadProblems(cursor: string | null = null): void {
     this.isLoading.set(true);
-    const params: any = {
+    const request: ProblemsRequest = {
       limit: 10,
-      cursor: cursor
+      ...(cursor ? { cursor } : {}),
+      ...(this.filters.difficulty ? { difficulty: this.filters.difficulty } : {}),
+      ...(this.filters.topicName ? { topicName: this.filters.topicName } : {})
     };
-    if (this.filters.difficulty) params.difficulty = this.filters.difficulty;
-    if (this.filters.topicName) params.topicName = this.filters.topicName;
 
-    this.problemService.getProblems(params).subscribe({
+    this.problemService.getProblems(request).subscribe({
       next: (res) => {
         if (cursor) {
-          this.problems.update(prev => [...prev, ...res.content]);
+          this.problems.update(prev => [...prev, ...res.content as any[]]);
         } else {
-          this.problems.set(res.content);
+          this.problems.set(res.content as any[]);
         }
-        this.hasNext.set(res.has_next);
-        this.nextCursor.set(res.next_cursor ?? null);
+        this.hasNext.set(res.hasNext);
+        this.nextCursor.set(res.nextCursor ?? null);
         this.isLoading.set(false);
       },
       error: () => this.isLoading.set(false)

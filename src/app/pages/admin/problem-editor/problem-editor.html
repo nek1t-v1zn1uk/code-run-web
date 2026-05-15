@@ -35,7 +35,12 @@
         <div class="form-row">
           <div class="form-group">
             <label>Topic (Optional)</label>
-            <input type="text" formControlName="topic" class="premium-input" placeholder="Topic name">
+            <select formControlName="topic" class="premium-input">
+              <option [ngValue]="null">No Topic</option>
+              @for (t of topics; track t.id) {
+                <option [value]="t.name">{{ t.name }}</option>
+              }
+            </select>
           </div>
           <div class="form-group">
             <label>Evaluation Type</label>
@@ -62,8 +67,8 @@
           <label>Default Script Checker</label>
           <select formControlName="default_script_checker_id" class="premium-input">
             <option [ngValue]="null">None</option>
-            @for (checker of checkers; track checker.tempId || checker.id) {
-              <option [value]="checker.id">{{ checker.name }}</option>
+            @for (checker of checkers; track $index) {
+              <option [ngValue]="checker.id">{{ checker.name }}</option>
             }
           </select>
         </div>
@@ -132,8 +137,8 @@
                 <label>Override Script Checker</label>
                 <select [(ngModel)]="selectedTest.override_script_checker_id">
                   <option [ngValue]="null">Use Default</option>
-                  @for (checker of checkers; track checker.tempId || checker.id) {
-                    <option [value]="checker.id">{{ checker.name }}</option>
+                  @for (checker of checkers; track $index) {
+                    <option [ngValue]="checker.id">{{ checker.name }}</option>
                   }
                 </select>
               </div>
@@ -152,7 +157,7 @@
         </div>
 
         <div class="checkers-grid">
-          @for (checker of checkers; track checker.tempId || checker.id; let i = $index) {
+          @for (checker of checkers; track $index; let i = $index) {
             <div class="checker-item" [class.selected]="selectedChecker === checker" (click)="selectChecker(checker)">
               <span class="checker-name">{{ checker.name || 'Unnamed Checker' }}</span>
               <span class="checker-lang">{{ checker.language }}</span>

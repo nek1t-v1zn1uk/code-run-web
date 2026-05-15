@@ -7,7 +7,10 @@ import {
     ProblemDto, 
     ProblemPageResponse, 
     ProblemTopic, 
-    UpdateProblemRequest 
+    UpdateProblemRequest,
+    Problem,
+    ProblemsRequest,
+    ProblemsResponse
 } from '../models/problem.models';
 
 @Injectable({
@@ -17,20 +20,22 @@ export class ProblemService {
     private http = inject(HttpClient);
     private baseUrl = `${environment.apiUrl}/v1/problems`;
 
-    getProblems(params?: any): Observable<ProblemPageResponse> {
-        let httpParams = new HttpParams();
-        if (params) {
-            Object.keys(params).forEach(key => {
-                if (params[key] !== null && params[key] !== undefined) {
-                    httpParams = httpParams.set(key, params[key]);
-                }
-            });
+    getProblems(request: ProblemsRequest): Observable<ProblemsResponse> {
+        let params = new HttpParams().set('limit', request.limit.toString());
+        if (request.difficulty) {
+            params = params.set('difficulty', request.difficulty);
         }
-        return this.http.get<ProblemPageResponse>(this.baseUrl, { params: httpParams });
+        if (request.topicName) {
+            params = params.set('topicName', request.topicName);
+        }
+        if (request.cursor) {
+            params = params.set('cursor', request.cursor);
+        }
+        return this.http.get<ProblemsResponse>(this.baseUrl, { params });
     }
 
-    getProblemById(id: number): Observable<ProblemDto> {
-        return this.http.get<ProblemDto>(`${this.baseUrl}/${id}`);
+    getProblemById<T = ProblemDto>(id: number): Observable<T> {
+        return this.http.get<T>(`${this.baseUrl}/${id}`);
     }
 
     getTopics(): Observable<ProblemTopic[]> {

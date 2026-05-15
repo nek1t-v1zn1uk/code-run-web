@@ -18,7 +18,12 @@
     </div>
     <div class="filter-group">
       <label>Topic</label>
-      <input type="text" [(ngModel)]="filters.topicName" (input)="loadProblems()" placeholder="Search topic...">
+      <select [(ngModel)]="filters.topicName" (change)="loadProblems()">
+        <option [ngValue]="null">All Topics</option>
+        @for (topic of topics(); track topic.name) {
+          <option [value]="topic.name">{{ topic.name }}</option>
+        }
+      </select>
     </div>
   </div>
 
