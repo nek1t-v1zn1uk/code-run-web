@@ -6,6 +6,10 @@
     overflow: auto;
 }
 
+* {
+    box-sizing: border-box;
+}
+
 .editor-container {
     max-width: 1400px;
     margin: 2rem auto;
@@ -44,6 +48,23 @@
 .back-btn:hover {
     background: rgba(255, 255, 255, 0.1);
     transform: translateX(-4px);
+}
+
+.detail-title {
+    margin: 0 0 2rem;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.detail-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .gradient-text {
@@ -106,9 +127,25 @@
 
 /* Sidebar Navigation */
 .editor-sidebar {
-    padding: 1.5rem 0;
+    padding: 1.5rem 0 0;
     position: sticky;
     top: 2rem;
+    height: fit-content;
+    max-height: calc(100vh - 8rem);
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    padding-top: 1.5rem;
+}
+
+.master-list-sidebar {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .tabs-nav {
@@ -147,8 +184,8 @@
 
 /* Main Content Area */
 .editor-main {
-    min-height: 700px;
-    padding: 2.5rem;
+    min-height: calc(100vh - 8rem);
+    padding: 3.5rem; /* Increased padding */
 }
 
 .section-title {
@@ -174,12 +211,32 @@
 
 .form-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem 2.5rem; /* Horizontal 1.5rem, Vertical 2.5rem */
+}
+
+.detail-card .form-grid {
+    row-gap: 2.5rem;
+}
+
+.detail-grids {
+    display: flex;
+    flex-direction: column;
+    gap: 3.5rem; /* Gap between grid rows */
+}
+
+.code-editor-section {
+    margin-top: 2.5rem;
+}
+
+@media (max-width: 1400px) {
+    .master-detail-layout .form-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .form-group.span-2 {
-    grid-column: span 2;
+    grid-column: 1 / -1;
 }
 
 .form-group {
@@ -264,23 +321,8 @@
 }
 
 /* Master-Detail Layout for Tests & Checkers */
-.master-detail-layout {
-    display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: 1.5rem;
-    min-height: 600px;
-}
-
-.master-list {
-    background: rgba(0, 0, 0, 0.15);
-    border-radius: 16px;
-    display: flex;
-    flex-direction: column;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
 .pane-header {
-    padding: 1.25rem;
+    padding: 0 1.25rem 1.25rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -320,32 +362,39 @@
 }
 
 .test-card {
-    padding: 1rem;
+    padding: 1.25rem;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
+    border-radius: 14px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .test-card:hover {
     background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
 }
 
 .test-card.active {
-    background: rgba(102, 126, 234, 0.1);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
     border-color: rgba(102, 126, 234, 0.5);
-    box-shadow: 0 0 15px rgba(102, 126, 234, 0.2);
+    box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.2);
 }
 
 .test-card .card-info {
     display: flex;
     align-items: center;
     gap: 1rem;
+    flex: 1; /* Ensure it takes available space */
+}
+
+.test-card .title-text {
+    font-weight: 600;
+    color: #ffffff; /* Fix black color */
 }
 
 .test-card .ordinal {
@@ -361,6 +410,13 @@
     font-weight: 700;
     text-transform: uppercase;
     color: #8a8aa3;
+}
+
+.badge.lang {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    margin-left: auto; /* Align to the right */
+    margin-right: 1rem; /* Gap before actions */
 }
 
 .badge.example {
@@ -403,21 +459,17 @@
 }
 
 .detail-card {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
-    padding: 2rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 2.5rem;
     animation: fadeIn 0.4s ease-out;
 }
 
-.detail-title {
-    margin: 0 0 1.5rem;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #ffffff;
+.checkbox-group {
+    margin-bottom: 2.5rem;
 }
 
-/* Checkbox Styles */
 .glass-checkbox {
     display: flex;
     align-items: center;
@@ -546,5 +598,8 @@
     .md-split textarea {
         border-right: none;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .form-grid {
+        grid-template-columns: 1fr;
     }
 }

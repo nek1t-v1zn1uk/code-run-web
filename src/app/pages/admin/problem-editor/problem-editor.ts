@@ -6,7 +6,6 @@ import { forkJoin, of, switchMap } from 'rxjs';
 import { marked } from 'marked';
 import markedKatex from 'marked-katex-extension';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import * as monaco from 'monaco-editor';
 
 import { ProblemService } from '../../../services/problem.service';
 import { TestService } from '../../../services/test.service';
@@ -14,6 +13,10 @@ import { ScriptCheckerService } from '../../../services/script-checker.service';
 import { ProblemDifficulty, EvaluationType, ProblemTopic } from '../../../models/problem.models';
 import { NewTestRequest, UpdateTestRequest, DeleteTestRequest, TestDto } from '../../../models/test.models';
 import { ScriptCheckerDto } from '../../../models/script-checker.models';
+
+// Declare monaco and require as they are loaded via script in index.html
+declare const monaco: any;
+declare const require: any;
 
 // Configure marked
 marked.use(markedKatex({ throwOnError: false, output: 'html' }));
@@ -35,11 +38,21 @@ export class ProblemEditor implements OnInit, AfterViewChecked {
   private sanitizer = inject(DomSanitizer);
 
   @ViewChild('checkerEditor') checkerEditorContainer?: ElementRef;
-  private editor?: monaco.editor.IStandaloneCodeEditor;
+  private editor?: any;
 
   isEditMode = false;
   problemId?: number;
-  activeTab: 'info' | 'tests' | 'checkers' = 'info';
+  private _activeTab: 'info' | 'tests' | 'checkers' = 'info';
+  get activeTab() { return this._activeTab; }
+  set activeTab(val: 'info' | 'tests' | 'checkers') {
+    if (this._activeTab === 'checkers' && val !== 'checkers') {
+      if (this.editor) {
+        this.editor.dispose();
+        this.editor = undefined;
+      }
+    }
+    this._activeTab = val;
+  }
   
   difficulties = Object.values(ProblemDifficulty);
   evaluationTypes = Object.values(EvaluationType);
@@ -82,9 +95,21 @@ export class ProblemEditor implements OnInit, AfterViewChecked {
     }
   }
 
+  private isEditorInitializing = false;
+
   ngAfterViewChecked(): void {
-    if (this.activeTab === 'checkers' && this.selectedChecker && this.checkerEditorContainer && !this.editor) {
-      this.initMonaco();
+    if (this.activeTab === 'checkers' && this.selectedChecker && this.checkerEditorContainer && !this.editor && !this.isEditorInitializing) {
+      this.isEditorInitializing = true;
+      // Ensure monaco is loaded via AMD require before initializing
+      if (typeof monaco === 'undefined') {
+        require(['vs/editor/editor.main'], () => {
+          this.initMonaco();
+          this.isEditorInitializing = false;
+        });
+      } else {
+        this.initMonaco();
+        this.isEditorInitializing = false;
+      }
     }
   }
 
@@ -202,7 +227,7 @@ export class ProblemEditor implements OnInit, AfterViewChecked {
 
     this.selectedChecker = checker;
     
-    // Dispose and re-init monaco for new checker
+    // Dispose old editor
     if (this.editor) {
       this.editor.dispose();
       this.editor = undefined;
@@ -225,18 +250,30 @@ export class ProblemEditor implements OnInit, AfterViewChecked {
   }
 
   initMonaco(): void {
-    if (!this.checkerEditorContainer) return;
+    if (!this.checkerEditorContainer || !this.selectedChecker) return;
+    
+    const container = this.checkerEditorContainer.nativeElement;
+    
+    // Safety check: if Monaco has already attached a 'data-mimic' or other attributes
+    // it can cause conflicts if we don't dispose the previous view properly.
+    if (container.childElementCount > 0 && !this.editor) {
+      container.innerHTML = '';
+    }
 
-    this.editor = monaco.editor.create(this.checkerEditorContainer.nativeElement, {
-      value: this.selectedChecker.code,
-      language: this.selectedChecker.language.toLowerCase(),
+    if (this.editor) return;
+
+    this.editor = monaco.editor.create(container, {
+      value: this.selectedChecker.code || '',
+      language: (this.selectedChecker.language || 'python').toLowerCase(),
       theme: 'vs-dark',
       automaticLayout: true,
       minimap: { enabled: false }
     });
 
     this.editor.onDidChangeModelContent(() => {
-      this.selectedChecker.code = this.editor?.getValue() || '';
+      if (this.selectedChecker) {
+        this.selectedChecker.code = this.editor?.getValue() || '';
+      }
     });
   }
 
@@ -273,7 +310,6 @@ export class ProblemEditor implements OnInit, AfterViewChecked {
     ops$.pipe(
       switchMap(results => {
         // Backfill IDs into this.checkers from create/update results
-        // results array mirrors checkerOps order (not deleteCheckerOps)
         const checkerResults = (results as any[]).slice(0, checkerOps.length);
         checkerResults.forEach((res, i) => {
           if (res?.id) {
@@ -281,18 +317,14 @@ export class ProblemEditor implements OnInit, AfterViewChecked {
           }
         });
 
-        // Build clean problem payload — resolve checker ID properly
+        // Build clean problem payload
         const formVal = this.problemForm.value;
         let defaultCheckerId: number | null = null;
 
-        // formVal.default_script_checker_id may be undefined (new checker was selected
-        // before it had a real id) — find it by matching tempId/id in this.checkers
         const formCheckerId = formVal.default_script_checker_id;
         if (formCheckerId !== null && formCheckerId !== undefined) {
-          // It's already a real numeric id
           defaultCheckerId = Number(formCheckerId);
         } else if (formVal.default_evaluation_type === EvaluationType.SCRIPT_CHECK && this.checkers.length > 0) {
-          // Fallback: if eval type is SCRIPT_CHECK but no id resolved, pick first checker
           defaultCheckerId = this.checkers[0].id ?? null;
         }
 
@@ -335,11 +367,6 @@ export class ProblemEditor implements OnInit, AfterViewChecked {
 
         const deleteTests: DeleteTestRequest[] = this.deletedTests.map(id => ({ id }));
 
-        // Two-phase update to avoid UNIQUE(problem_id, ordinal) constraint violations.
-        // When reordering, the backend applies UPDATEs sequentially — any swap (e.g. 1↔2)
-        // creates a transient duplicate regardless of ordering.
-        // Phase 1: move existing tests to ordinal+10000 (safe temp range, no real test can be there).
-        // Phase 2: move to final ordinals + handle new/deleted tests.
         if (updateTests.length > 0) {
           const tempUpdateTests = updateTests.map(t => ({ id: t.id, ordinal: t.ordinal! + 10000 }));
           return this.testService.updateTestList(this.problemId!, {

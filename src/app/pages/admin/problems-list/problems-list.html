@@ -14,27 +14,25 @@
   </div>
 
   <div class="dashboard-controls premium-glass">
-    <div class="search-box">
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
-        <circle cx="11" cy="11" r="8"></circle>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-      </svg>
-      <input type="text" [(ngModel)]="searchTitle" (input)="onSearchChange()" placeholder="Search by title...">
-    </div>
     
     <div class="filter-group">
       <label>Difficulty</label>
       <select [(ngModel)]="selectedDifficulty" (change)="onSearchChange()" class="glass-select">
         <option [ngValue]="null">All Difficulties</option>
         @for (diff of difficulties; track diff) {
-          <option [ngValue]="diff">{{ diff | titlecase }}</option>
+          <option [ngValue]="diff">{{ diff.replace('_', ' ') | titlecase }}</option>
         }
       </select>
     </div>
 
     <div class="filter-group">
       <label>Topic</label>
-      <input type="text" [(ngModel)]="selectedTopic" (input)="onSearchChange()" placeholder="Filter by topic...">
+      <select [(ngModel)]="selectedTopic" (change)="onSearchChange()" class="glass-select">
+        <option [ngValue]="null">All Topics</option>
+        @for (t of topics(); track t.id) {
+          <option [value]="t.name">{{ t.name }}</option>
+        }
+      </select>
     </div>
   </div>
 
@@ -44,7 +42,7 @@
         <div class="spinner"></div>
         <p>Loading problems...</p>
       </div>
-    } @else if (problems.length === 0) {
+    } @else if (problems().length === 0) {
       <div class="empty-state">
         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"></circle>
@@ -64,7 +62,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (problem of problems; track problem.id) {
+          @for (problem of problems(); track problem.id) {
             <tr>
               <td>
                 <div class="problem-title-cell">
@@ -80,10 +78,10 @@
                 </span>
               </td>
               <td>
-                <span class="topic-tag">{{ problem.topic || 'General' }}</span>
+                <span class="topic-tag">{{ problem.topic?.name || 'General' }}</span>
               </td>
               <td>
-                <span class="eval-type">{{ problem.evaluation_type.replace('_', ' ') }}</span>
+                <span class="eval-type">{{ (problem.default_evaluation_type || '').replace('_', ' ') }}</span>
               </td>
               <td>
                 <div class="actions">

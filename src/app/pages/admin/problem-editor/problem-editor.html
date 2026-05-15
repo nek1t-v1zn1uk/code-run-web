@@ -36,6 +36,57 @@
           Checkers ({{ checkers.length }})
         </button>
       </nav>
+
+      <div class="sidebar-content">
+        @if (activeTab === 'tests') {
+          <div class="master-list-sidebar">
+            <div class="pane-header">
+              <h3>Test Cases</h3>
+              <button class="add-btn-small" (click)="addTest()" title="Add Test Case">+</button>
+            </div>
+            <div class="scroll-list">
+              @for (test of tests; track test.tempId || test.id; let i = $index) {
+                <div class="test-card" [class.active]="selectedTest === test" (click)="selectTest(test)">
+                  <div class="card-info">
+                    <span class="ordinal">#{{ i + 1 }}</span>
+                    <span class="badge" [class.example]="test.is_example">{{ test.is_example ? 'Example' : 'Test' }}</span>
+                  </div>
+                  <div class="card-actions">
+                    <button (click)="moveTest(i, -1); $event.stopPropagation()" [disabled]="i === 0">↑</button>
+                    <button (click)="moveTest(i, 1); $event.stopPropagation()" [disabled]="i === tests.length - 1">↓</button>
+                    <button class="delete-btn" (click)="deleteTest(i); $event.stopPropagation()">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        @if (activeTab === 'checkers') {
+          <div class="master-list-sidebar">
+            <div class="pane-header">
+              <h3>Script Checkers</h3>
+              <button class="add-btn-small" (click)="addChecker()" title="Add Checker">+</button>
+            </div>
+            <div class="scroll-list">
+              @for (checker of checkers; track $index; let i = $index) {
+                <div class="test-card" [class.active]="selectedChecker === checker" (click)="selectChecker(checker)">
+                  <div class="card-info">
+                    <span class="title-text">{{ checker.name || 'Unnamed' }}</span>
+                    <span class="badge lang">{{ checker.language }}</span>
+                  </div>
+                  <div class="card-actions">
+                    <button class="delete-btn" (click)="deleteChecker(i); $event.stopPropagation()">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
     </aside>
 
     <main class="editor-main premium-glass">
@@ -116,138 +167,92 @@
         </div>
       }
 
-      <!-- TESTS TAB -->
+      <!-- TESTS TAB DETAIL -->
       @if (activeTab === 'tests') {
-        <div class="tab-pane tests-pane">
-          <div class="master-detail-layout">
-            <div class="master-list">
-              <div class="pane-header">
-                <h3>Test Cases</h3>
-                <button class="add-btn-small" (click)="addTest()" title="Add Test Case">+</button>
+        <div class="tab-pane detail-view-only">
+          @if (selectedTest) {
+            <div class="detail-card">
+              <h4 class="detail-title">Test Case Configuration #{{ tests.indexOf(selectedTest) + 1 }}</h4>
+              <div class="form-group checkbox-group">
+                <label class="glass-checkbox">
+                  <input type="checkbox" [(ngModel)]="selectedTest.is_example">
+                  <span class="checkmark"></span>
+                  Include in problem examples
+                </label>
               </div>
-              <div class="scroll-list">
-                @for (test of tests; track test.tempId || test.id; let i = $index) {
-                  <div class="test-card" [class.active]="selectedTest === test" (click)="selectTest(test)">
-                    <div class="card-info">
-                      <span class="ordinal">#{{ i + 1 }}</span>
-                      <span class="badge" [class.example]="test.is_example">{{ test.is_example ? 'Example' : 'Test' }}</span>
-                    </div>
-                    <div class="card-actions">
-                      <button (click)="moveTest(i, -1); $event.stopPropagation()" [disabled]="i === 0">↑</button>
-                      <button (click)="moveTest(i, 1); $event.stopPropagation()" [disabled]="i === tests.length - 1">↓</button>
-                      <button class="delete-btn" (click)="deleteTest(i); $event.stopPropagation()">×</button>
-                    </div>
+              <div class="detail-grids">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label>Input Data</label>
+                    <textarea [(ngModel)]="selectedTest.input_data" class="glass-textarea" rows="4" placeholder="Standard input..."></textarea>
                   </div>
-                }
-              </div>
-            </div>
-
-            <div class="detail-view">
-              @if (selectedTest) {
-                <div class="detail-card">
-                  <h4 class="detail-title">Test Case Configuration #{{ tests.indexOf(selectedTest) + 1 }}</h4>
-                  <div class="form-group checkbox-group">
-                    <label class="glass-checkbox">
-                      <input type="checkbox" [(ngModel)]="selectedTest.is_example">
-                      <span class="checkmark"></span>
-                      Include in problem examples
-                    </label>
-                  </div>
-                  <div class="form-grid">
-                    <div class="form-group">
-                      <label>Input Data</label>
-                      <textarea [(ngModel)]="selectedTest.input_data" class="glass-textarea" rows="4" placeholder="Standard input..."></textarea>
-                    </div>
-                    <div class="form-group">
-                      <label>Expected Output</label>
-                      <textarea [(ngModel)]="selectedTest.expected_output" class="glass-textarea" rows="4" placeholder="Standard output..."></textarea>
-                    </div>
-                  </div>
-                  <div class="form-grid">
-                    <div class="form-group">
-                      <label>Override Evaluation</label>
-                      <select [(ngModel)]="selectedTest.override_evaluation_type" class="glass-select">
-                        <option [ngValue]="null">Inherit from Problem</option>
-                        @for (type of evaluationTypes; track type) {
-                          <option [value]="type">{{ type.replace('_', ' ') | titlecase }}</option>
-                        }
-                      </select>
-                    </div>
-                    <div class="form-group">
-                      <label>Override Checker</label>
-                      <select [(ngModel)]="selectedTest.override_script_checker_id" class="glass-select">
-                        <option [ngValue]="null">Inherit from Problem</option>
-                        @for (checker of checkers; track $index) {
-                          <option [ngValue]="checker.id">{{ checker.name }}</option>
-                        }
-                      </select>
-                    </div>
+                  <div class="form-group">
+                    <label>Expected Output</label>
+                    <textarea [(ngModel)]="selectedTest.expected_output" class="glass-textarea" rows="4" placeholder="Standard output..."></textarea>
                   </div>
                 </div>
-              } @else {
-                <div class="selection-placeholder">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                  <p>Select a test case to configure its data</p>
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label>Override Evaluation</label>
+                    <select [(ngModel)]="selectedTest.override_evaluation_type" class="glass-select">
+                      <option [ngValue]="null">Inherit from Problem</option>
+                      @for (type of evaluationTypes; track type) {
+                        <option [value]="type">{{ type.replace('_', ' ') | titlecase }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Override Checker</label>
+                    <select [(ngModel)]="selectedTest.override_script_checker_id" class="glass-select">
+                      <option [ngValue]="null">Inherit from Problem</option>
+                      @for (checker of checkers; track $index) {
+                        <option [ngValue]="checker.id">{{ checker.name }}</option>
+                      }
+                    </select>
+                  </div>
                 </div>
-              }
+              </div>
             </div>
-          </div>
+          } @else {
+            <div class="selection-placeholder">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              <p>Select a test case from the sidebar</p>
+            </div>
+          }
         </div>
       }
 
-      <!-- CHECKERS TAB -->
+      <!-- CHECKERS TAB DETAIL -->
       @if (activeTab === 'checkers') {
-        <div class="tab-pane checkers-pane">
-          <div class="master-detail-layout">
-            <div class="master-list">
-              <div class="pane-header">
-                <h3>Script Checkers</h3>
-                <button class="add-btn-small" (click)="addChecker()" title="Add Checker">+</button>
+        <div class="tab-pane detail-view-only">
+          @if (selectedChecker) {
+            <div class="detail-card">
+              <h4 class="detail-title">Checker Implementation</h4>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Checker Name</label>
+                  <input type="text" [(ngModel)]="selectedChecker.name" class="glass-input" placeholder="e.g. Float Comparison">
+                </div>
+                <div class="form-group">
+                  <label>Language</label>
+                  <select [(ngModel)]="selectedChecker.language" class="glass-select">
+                    @for (lang of availableLangs; track lang) {
+                      <option [value]="lang">{{ lang | titlecase }}</option>
+                    }
+                  </select>
+                </div>
               </div>
-              <div class="scroll-list">
-                @for (checker of checkers; track $index; let i = $index) {
-                  <div class="test-card" [class.active]="selectedChecker === checker" (click)="selectChecker(checker)">
-                    <div class="card-info">
-                      <span class="title-text">{{ checker.name || 'Unnamed' }}</span>
-                      <span class="badge lang">{{ checker.language }}</span>
-                    </div>
-                    <button class="delete-btn" (click)="deleteChecker(i); $event.stopPropagation()">×</button>
-                  </div>
-                }
+              <div class="code-editor-section form-group">
+                <label>Script Source Code</label>
+                <div #checkerEditor class="monaco-container"></div>
               </div>
             </div>
-
-            <div class="detail-view">
-              @if (selectedChecker) {
-                <div class="detail-card">
-                  <h4 class="detail-title">Checker Implementation</h4>
-                  <div class="form-grid">
-                    <div class="form-group">
-                      <label>Checker Name</label>
-                      <input type="text" [(ngModel)]="selectedChecker.name" class="glass-input" placeholder="e.g. Float Comparison">
-                    </div>
-                    <div class="form-group">
-                      <label>Language</label>
-                      <select [(ngModel)]="selectedChecker.language" class="glass-select">
-                        @for (lang of availableLangs; track lang) {
-                          <option [value]="lang">{{ lang | titlecase }}</option>
-                        }
-                      </select>
-                    </div>
-                  </div>
-                  <div class="code-editor-section">
-                    <label>Script Source Code</label>
-                    <div #checkerEditor class="monaco-container"></div>
-                  </div>
-                </div>
-              } @else {
-                <div class="selection-placeholder">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-                  <p>Select a script checker to edit its code</p>
-                </div>
-              }
+          } @else {
+            <div class="selection-placeholder">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+              <p>Select a script checker from the sidebar</p>
             </div>
-          </div>
+          }
         </div>
       }
     </main>

@@ -23,10 +23,9 @@ export class AdminProblemsList implements OnInit {
 
   difficulties = Object.values(ProblemDifficulty);
   topics = signal<ProblemTopic[]>([]);
-  filters = {
-    difficulty: null as ProblemDifficulty | null,
-    topicName: null as string | null
-  };
+  
+  selectedDifficulty: ProblemDifficulty | null = null;
+  selectedTopic: string | null = null;
 
   ngOnInit(): void {
     this.loadTopics();
@@ -36,7 +35,7 @@ export class AdminProblemsList implements OnInit {
   loadTopics(): void {
     this.problemService.getTopics().subscribe({
       next: (topics) => this.topics.set(topics),
-      error: () => {}
+      error: () => { }
     });
   }
 
@@ -45,8 +44,8 @@ export class AdminProblemsList implements OnInit {
     const request: ProblemsRequest = {
       limit: 10,
       ...(cursor ? { cursor } : {}),
-      ...(this.filters.difficulty ? { difficulty: this.filters.difficulty } : {}),
-      ...(this.filters.topicName ? { topicName: this.filters.topicName } : {})
+      ...(this.selectedDifficulty ? { difficulty: this.selectedDifficulty } : {}),
+      ...(this.selectedTopic ? { topicName: this.selectedTopic } : {})
     };
 
     this.problemService.getProblems(request).subscribe({
@@ -64,6 +63,11 @@ export class AdminProblemsList implements OnInit {
     });
   }
 
+
+  onSearchChange(): void {
+    this.loadProblems();
+  }
+
   loadMore(): void {
     if (this.nextCursor()) {
       this.loadProblems(this.nextCursor());
@@ -74,11 +78,11 @@ export class AdminProblemsList implements OnInit {
     this.router.navigate(['/admin/problems/new']);
   }
 
-  onEdit(id: number): void {
+  onEditProblem(id: number): void {
     this.router.navigate([`/admin/problems/${id}`]);
   }
 
-  onDelete(id: number): void {
+  onDeleteProblem(id: number): void {
     if (confirm('Are you sure you want to delete this problem?')) {
       this.problemService.deleteProblem(id).subscribe({
         next: () => {
@@ -87,10 +91,5 @@ export class AdminProblemsList implements OnInit {
         error: (err) => alert('Failed to delete problem: ' + (err.error?.message || 'Unknown error'))
       });
     }
-  }
-
-  formatDifficulty(diff: string): string {
-    return diff.replace('_', ' ').toLowerCase()
-      .replace(/\b\w/g, l => l.toUpperCase());
   }
 }
