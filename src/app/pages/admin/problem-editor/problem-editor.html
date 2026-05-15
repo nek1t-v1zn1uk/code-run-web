@@ -171,7 +171,7 @@
       @if (activeTab === 'tests') {
         <div class="tab-pane detail-view-only">
           @if (selectedTest) {
-            <div class="detail-card">
+            <div class="tab-content">
               <h4 class="detail-title">Test Case Configuration #{{ tests.indexOf(selectedTest) + 1 }}</h4>
               <div class="form-group checkbox-group">
                 <label class="glass-checkbox">
@@ -226,7 +226,7 @@
       @if (activeTab === 'checkers') {
         <div class="tab-pane detail-view-only">
           @if (selectedChecker) {
-            <div class="detail-card">
+            <div class="tab-content">
               <h4 class="detail-title">Checker Implementation</h4>
               <div class="form-grid">
                 <div class="form-group">

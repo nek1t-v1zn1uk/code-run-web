@@ -1,9 +1,9 @@
 :host {
-    display: block;
+    display: flex;
+    flex-direction: column;
     width: 100%;
     min-height: 100vh;
     background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
-    overflow: auto;
 }
 
 * {
@@ -12,9 +12,13 @@
 
 .editor-container {
     max-width: 1400px;
-    margin: 2rem auto;
-    padding: 0 2rem;
+    width: 100%;
+    margin: 0 auto;
+    padding: 2rem;
     animation: fadeIn 0.6s ease-out;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Header Styles */
@@ -184,8 +188,13 @@
 
 /* Main Content Area */
 .editor-main {
-    min-height: calc(100vh - 8rem);
-    padding: 3.5rem; /* Increased padding */
+    min-height: auto;
+    height: fit-content;
+    padding: 3rem;
+}
+
+.tab-pane {
+    width: 100%;
 }
 
 .section-title {
@@ -459,11 +468,7 @@
 }
 
 .detail-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 20px;
-    padding: 2.5rem;
-    animation: fadeIn 0.4s ease-out;
+    display: contents; /* Effectively removes the container but keeps children */
 }
 
 .checkbox-group {
