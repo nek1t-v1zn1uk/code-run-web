@@ -44,9 +44,9 @@ export interface ProblemsRequest {
 
 export interface ProblemsResponse {
     content: Problem[];
-    hasNext: boolean;
-    nextCursor: string;
-    isEmpty: boolean;
+    has_next: boolean;
+    next_cursor: string | null;
+    is_empty: boolean;
 }
 
 export interface ProblemDto {

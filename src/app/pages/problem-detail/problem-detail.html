@@ -15,84 +15,128 @@
         </button>
     </div>
     } @else if (problem()) {
-    <div class="problem-content">
-        <!-- Header with Back Button -->
-        <div class="problem-header">
-            <button class="btn-back" (click)="goBack()">
-                <span class="back-icon">←</span>
-                Back to Problems
-            </button>
-        </div>
-
-        <!-- Problem Title Section -->
-        <div class="title-section">
-            <div class="title-row">
-                <h1 class="problem-title">{{ problem()!.title }}</h1>
-                <span class="difficulty-badge" [class]="getDifficultyClass(problem()!.difficulty)">
-                    {{ getDifficultyLabel(problem()!.difficulty) }}
-                </span>
+    <div class="split-layout">
+        <!-- Left Pane: Problem Description -->
+        <div class="left-pane">
+            <div class="problem-header">
+                <button class="btn-back" (click)="goBack()">
+                    <span class="back-icon">←</span>
+                    Back
+                </button>
             </div>
-
-            <div class="problem-metadata">
-                <span class="meta-item">
-                    <span class="meta-icon">🏷️</span>
-                    Topic: <strong>{{ problem()!.topic?.name || 'None' }}</strong>
-                </span>
-                <span class="meta-item">
-                    <span class="meta-icon">📅</span>
-                    Created: <strong>{{ formatDate(problem()!.created_at) }}</strong>
-                </span>
-            </div>
-        </div>
-
-        <!-- Problem Statement Section -->
-        <div class="section statement-section">
-            <div class="section-header">
-                <h2 class="section-title">
-                    <span class="section-icon">📝</span>
-                    Problem Statement
-                </h2>
-            </div>
-            <div class="section-content">
-                <div class="statement-text markdown-content" [innerHTML]="statementHtml()"></div>
-            </div>
-        </div>
-
-        <!-- Constraints Section -->
-        <div class="section constraints-section">
-            <div class="section-header">
-                <h2 class="section-title">
-                    <span class="section-icon">⚙️</span>
-                    Constraints
-                </h2>
-            </div>
-            <div class="section-content">
-                <div class="constraints-grid">
-                    <div class="constraint-item">
-                        <div class="constraint-icon">⏱️</div>
-                        <div class="constraint-details">
-                            <div class="constraint-label">Time Limit</div>
-                            <div class="constraint-value">{{ problem()!.execution_time_limit_ms }} ms</div>
-                        </div>
+            <div class="problem-content">
+                <div class="title-section">
+                    <div class="title-row">
+                        <h1 class="problem-title">{{ problem()!.title }}</h1>
+                        <span class="difficulty-badge" [class]="getDifficultyClass(problem()!.difficulty)">
+                            {{ getDifficultyLabel(problem()!.difficulty) }}
+                        </span>
                     </div>
-                    <div class="constraint-item">
-                        <div class="constraint-icon">💾</div>
-                        <div class="constraint-details">
-                            <div class="constraint-label">Memory Limit</div>
-                            <div class="constraint-value">{{ problem()!.execution_memory_limit_kb / 1024 }} MB</div>
+                    <div class="problem-metadata">
+                        <span class="meta-item">
+                            <span class="meta-icon">🏷️</span>
+                            Topic: <strong>{{ problem()!.topic?.name || 'None' }}</strong>
+                        </span>
+                        <span class="meta-item">
+                            <span class="meta-icon">📅</span>
+                            Created: <strong>{{ formatDate(problem()!.created_at) }}</strong>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="section constraints-section">
+                    <div class="constraints-grid">
+                        <div class="constraint-item">
+                            <div class="constraint-icon">⏱️</div>
+                            <div class="constraint-details">
+                                <div class="constraint-label">Time Limit</div>
+                                <div class="constraint-value">{{ problem()!.execution_time_limit_ms }} ms</div>
+                            </div>
+                        </div>
+                        <div class="constraint-item">
+                            <div class="constraint-icon">💾</div>
+                            <div class="constraint-details">
+                                <div class="constraint-label">Memory Limit</div>
+                                <div class="constraint-value">{{ problem()!.execution_memory_limit_kb / 1024 | number:'1.0-2' }} MB</div>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <div class="section statement-section">
+                    <div class="section-content">
+                        <div class="statement-text markdown-content" [innerHTML]="statementHtml()"></div>
+                    </div>
+                </div>
+
+                @if (!isSolvingStarted()) {
+                <div class="action-section">
+                    <button class="btn btn-primary btn-large" (click)="startSolving()">
+                        <span class="btn-icon">💻</span>
+                        Start Solving
+                    </button>
+                </div>
+                }
             </div>
         </div>
 
-        <!-- Action Section -->
-        <div class="action-section">
-            <button class="btn btn-primary btn-large">
-                <span class="btn-icon">💻</span>
-                Start Solving
-            </button>
+        @if (isSolvingStarted()) {
+        <!-- Right Pane: Code Editor -->
+        <div class="right-pane premium-glass">
+            <div class="editor-header">
+                <div class="lang-selector">
+                    <label>Language:</label>
+                    <select [(ngModel)]="selectedLanguage" (change)="onLanguageChange()" class="glass-select">
+                        @for (lang of availableLangs; track lang) {
+                            <option [value]="lang">{{ lang | uppercase }}</option>
+                        }
+                    </select>
+                </div>
+                <button class="btn btn-primary" [disabled]="isSubmitting()" (click)="submitSolution()">
+                    @if (isSubmitting()) {
+                        <span class="spinner-small"></span>
+                        Evaluating...
+                    } @else {
+                        <span class="btn-icon">▶</span>
+                        Submit
+                    }
+                </button>
+            </div>
+            
+            <div class="code-editor-wrapper">
+                <div #codeEditor class="monaco-container"></div>
+            </div>
+
+            @if (solutionResult()) {
+                <div class="result-panel" [ngClass]="'status-' + solutionResult()!.status.toLowerCase()">
+                    <div class="result-header">
+                        <h3 class="result-title">Evaluation Result</h3>
+                        <span class="status-badge">{{ solutionResult()!.status.replace('_', ' ') }}</span>
+                    </div>
+                    <div class="result-details">
+                        @if (solutionResult()!.test_case_reached !== null && solutionResult()!.test_case_reached !== undefined) {
+                            <div class="detail-item">
+                                <span class="detail-label">Failed on Test:</span>
+                                <span class="detail-value">#{{ solutionResult()!.test_case_reached }}</span>
+                            </div>
+                        }
+                        @if (solutionResult()!.status === 'TIME_LIMIT_EXCEEDED' && solutionResult()!.execution_time_ms !== null && solutionResult()!.execution_time_ms !== undefined) {
+                            <div class="detail-item">
+                                <span class="detail-label">Execution Time:</span>
+                                <span class="detail-value">{{ solutionResult()!.execution_time_ms }} ms</span>
+                            </div>
+                        }
+                        @if (solutionResult()!.status === 'MEMORY_LIMIT_EXCEEDED' && solutionResult()!.execution_memory_kb !== null && solutionResult()!.execution_memory_kb !== undefined) {
+                            <div class="detail-item">
+                                <span class="detail-label">Memory Used:</span>
+                                <span class="detail-value">{{ solutionResult()!.execution_memory_kb! / 1024 | number:'1.0-2' }} MB</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
         </div>
+        }
     </div>
     }
 </div>

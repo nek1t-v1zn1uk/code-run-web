@@ -55,8 +55,8 @@ export class AdminProblemsList implements OnInit {
         } else {
           this.problems.set(res.content as any[]);
         }
-        this.hasNext.set(res.hasNext);
-        this.nextCursor.set(res.nextCursor ?? null);
+        this.hasNext.set(res.has_next);
+        this.nextCursor.set(res.next_cursor ?? null);
         this.isLoading.set(false);
       },
       error: () => this.isLoading.set(false)

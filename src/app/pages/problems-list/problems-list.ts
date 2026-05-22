@@ -68,8 +68,8 @@ export class ProblemsList implements OnInit, OnDestroy {
                 } else {
                     this.problems.set([...this.problems(), ...response.content]);
                 }
-                this.hasNext = response.hasNext;
-                this.nextCursor = response.nextCursor;
+                this.hasNext = response.has_next;
+                this.nextCursor = response.next_cursor;
                 this.isLoading.set(false);
                 this.isLoadingMore.set(false);
             },
