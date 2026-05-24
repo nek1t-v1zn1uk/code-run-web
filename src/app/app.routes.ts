@@ -22,6 +22,18 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/admin/problems-list/problems-list').then(m => m.AdminProblemsList)
     },
     {
+        path: 'admin/contests',
+        loadComponent: () => import('./pages/admin/contests-list/contests-list').then(m => m.AdminContestsList)
+    },
+    {
+        path: 'admin/contests/new',
+        loadComponent: () => import('./pages/admin/contest-editor/contest-editor').then(m => m.AdminContestEditor)
+    },
+    {
+        path: 'admin/contests/:id',
+        loadComponent: () => import('./pages/admin/contest-editor/contest-editor').then(m => m.AdminContestEditor)
+    },
+    {
         path: 'admin/problems/new',
         loadComponent: () => import('./pages/admin/problem-editor/problem-editor').then(m => m.ProblemEditor)
     },
@@ -32,6 +44,14 @@ export const routes: Routes = [
     {
         path: 'problems/:id',
         loadComponent: () => import('./pages/problem-detail/problem-detail').then(m => m.ProblemDetail)
+    },
+    {
+        path: 'contests',
+        loadComponent: () => import('./pages/contests-list/contests-list').then(m => m.ContestsList)
+    },
+    {
+        path: 'contests/:id',
+        loadComponent: () => import('./pages/contest-detail/contest-detail').then(m => m.ContestDetail)
     },
     {
         path: '**',

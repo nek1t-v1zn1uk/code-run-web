@@ -1,0 +1,142 @@
+<div class="editor-container">
+  <div class="editor-header">
+    <div class="header-left">
+      <button class="back-btn" (click)="goBack()" title="Back to Contests">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+      </button>
+      <div class="header-info">
+        <h1 class="gradient-text">{{ isEditMode ? 'View Contest' : 'Create Contest' }}</h1>
+        <p class="subtitle">{{ isEditMode ? 'Contest ID: #' + contestId : 'Define new competition' }}</p>
+      </div>
+    </div>
+    <button class="save-btn" [disabled]="isSaving()" (click)="onSave()">
+      @if (isSaving()) {
+        <span class="spinner-small"></span>
+        Saving...
+      } @else {
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+        {{ isEditMode ? 'Save Changes' : 'Save Contest' }}
+      }
+    </button>
+  </div>
+
+  <div class="editor-layout">
+    <main class="editor-main premium-glass">
+      <div class="tab-pane" [formGroup]="contestForm">
+        <section class="form-section">
+          <h3 class="section-title">General Info</h3>
+          <div class="form-grid">
+            <div class="form-group span-2">
+              <label>Contest Name</label>
+              <input type="text" formControlName="name" class="glass-input" placeholder="Enter name...">
+            </div>
+          </div>
+
+          <div class="form-grid" style="margin-top: 1rem;">
+            <div class="form-group span-2">
+              <label>Overview</label>
+              <textarea formControlName="overview" class="glass-textarea" rows="3" placeholder="Brief description of the contest..."></textarea>
+            </div>
+            <div class="form-group span-2">
+              <label>Rules</label>
+              <textarea formControlName="rules" class="glass-textarea" rows="4" placeholder="Rules of the contest..."></textarea>
+            </div>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <h3 class="section-title">Schedule</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Start</label>
+              <div class="datetime-group">
+                <input type="date" formControlName="startDate" class="glass-input">
+                <input type="time" formControlName="startTime" class="glass-input time-input">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>End</label>
+              <div class="datetime-group">
+                <input type="date" formControlName="endDate" class="glass-input">
+                <input type="time" formControlName="endTime" class="glass-input time-input">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Freeze (Optional)</label>
+              <div class="datetime-group">
+                <input type="date" formControlName="freezeDate" class="glass-input">
+                <input type="time" formControlName="freezeTime" class="glass-input time-input">
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══════════ PROBLEMS SECTION ═══════════ -->
+        @if (isEditMode) {
+          <section class="form-section">
+            <h3 class="section-title">Problems</h3>
+
+            <!-- Add new problem dropdown -->
+            <div class="add-problem-row">
+              <select [(ngModel)]="selectedProblemId" [ngModelOptions]="{standalone: true}" class="glass-select problem-select">
+                <option value="" disabled selected>— Select a problem to add —</option>
+                @for (prob of availableToAdd; track prob.id) {
+                  <option [value]="prob.id">{{ prob.title }}</option>
+                }
+              </select>
+              <button class="save-btn add-btn" (click)="addProblem()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Add
+              </button>
+            </div>
+
+            <!-- Problem list -->
+            @if (problemRows().length > 0) {
+              <div class="problem-list">
+                @for (row of problemRows(); track row.problem_id; let i = $index) {
+                  <div class="problem-row">
+                    <span class="ordinal-badge">{{ row.ordinal }}</span>
+
+                    <select class="glass-select row-select"
+                            [ngModel]="row.problem_id"
+                            [ngModelOptions]="{standalone: true}"
+                            (ngModelChange)="changeProblem(i, +$event)">
+                      @for (prob of allProblems(); track prob.id) {
+                        <option [value]="prob.id">{{ prob.title }}</option>
+                      }
+                    </select>
+
+                    <div class="row-actions">
+                      <button class="icon-btn" (click)="moveProblemUp(i)" [disabled]="i === 0" title="Move up">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                      </button>
+                      <button class="icon-btn" (click)="moveProblemDown(i)" [disabled]="i === problemRows().length - 1" title="Move down">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                      </button>
+                      <button class="icon-btn icon-btn-danger" (click)="removeProblem(i)" title="Remove">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <div class="save-problems-bar">
+                <button class="save-btn" [disabled]="isSavingProblems()" (click)="saveProblems()">
+                  @if (isSavingProblems()) {
+                    <span class="spinner-small"></span>
+                    Saving...
+                  } @else {
+                    Save Problems
+                  }
+                </button>
+              </div>
+            } @else {
+              <p class="empty-text">No problems added yet. Select one above.</p>
+            }
+          </section>
+        }
+      </div>
+    </main>
+  </div>
+</div>

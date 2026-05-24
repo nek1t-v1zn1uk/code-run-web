@@ -1,0 +1,55 @@
+<div class="contests-container">
+    <header class="header">
+        <h1 class="title">
+            <span class="icon">🏆</span>
+            Contests
+        </h1>
+        <p class="subtitle">Compete with others and prove your skills</p>
+    </header>
+
+    <div class="contests-content">
+        @if (isLoading()) {
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <p>Loading contests...</p>
+        </div>
+        } @else if (contests().length === 0) {
+        <div class="empty-state">
+            <span class="empty-icon">📭</span>
+            <h2>No contests found</h2>
+            <p>Check back later for upcoming contests</p>
+        </div>
+        } @else {
+        <div class="contests-grid">
+            @for (contest of contests(); track contest.id) {
+            <div class="contest-card" (click)="navigateToContest(contest.id)">
+                <div class="card-header">
+                    <h3 class="contest-title">{{ contest.name || 'Unnamed Contest' }}</h3>
+                    <span class="status-badge" [class]="getStatusClass(getStatus(contest))">
+                        {{ getStatus(contest) }}
+                    </span>
+                </div>
+
+                <div class="card-body">
+                    <p class="contest-overview">{{ contest.overview || 'No overview available' }}</p>
+                    <div class="contest-meta">
+                        <span class="meta-item">
+                            <span class="meta-icon">🕒</span>
+                            Start: {{ formatDate(contest.start_time) }}
+                        </span>
+                        <span class="meta-item">
+                            <span class="meta-icon">🏁</span>
+                            End: {{ formatDate(contest.end_time) }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <span class="view-arrow">→</span>
+                </div>
+            </div>
+            }
+        </div>
+        }
+    </div>
+</div>
