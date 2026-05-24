@@ -33,6 +33,10 @@ export class ProblemDetail implements OnInit, AfterViewChecked, OnDestroy {
     private editor?: any;
     private isEditorInitializing = false;
 
+    @ViewChild('modalCodeEditor') modalCodeEditorContainer?: ElementRef;
+    private modalEditor?: any;
+    private isModalEditorInitializing = false;
+
     availableLangs = ['python', 'c', 'cpp', 'java', 'kotlin'];
     selectedLanguage = 'python';
     currentCode = '';
@@ -41,6 +45,9 @@ export class ProblemDetail implements OnInit, AfterViewChecked, OnDestroy {
     solutionResult = signal<SolutionDto | null>(null);
     pollInterval: any;
     isSolvingStarted = signal(false);
+    solutions = signal<SolutionDto[]>([]);
+    activeLeftTab = signal<'description' | 'submissions'>('description');
+    viewingSolution = signal<SolutionDto | null>(null);
 
     constructor(
         private problemService: ProblemService,
@@ -71,6 +78,19 @@ export class ProblemDetail implements OnInit, AfterViewChecked, OnDestroy {
             } else {
                 this.initMonaco();
                 this.isEditorInitializing = false;
+            }
+        }
+
+        if (this.viewingSolution() && this.modalCodeEditorContainer && !this.modalEditor && !this.isModalEditorInitializing) {
+            this.isModalEditorInitializing = true;
+            if (typeof monaco === 'undefined') {
+                require(['vs/editor/editor.main'], () => {
+                    this.initModalMonaco();
+                    this.isModalEditorInitializing = false;
+                });
+            } else {
+                this.initModalMonaco();
+                this.isModalEditorInitializing = false;
             }
         }
     }
@@ -105,6 +125,30 @@ export class ProblemDetail implements OnInit, AfterViewChecked, OnDestroy {
         });
     }
 
+    private initModalMonaco(): void {
+        if (!this.modalCodeEditorContainer) return;
+        const container = this.modalCodeEditorContainer.nativeElement;
+        if (container.childElementCount > 0 && !this.modalEditor) {
+            container.innerHTML = '';
+        }
+        if (this.modalEditor) return;
+
+        const sol = this.viewingSolution();
+        if (!sol) return;
+
+        const lang = (typeof sol.language === 'string') ? sol.language : (sol.language?.language || 'plaintext');
+
+        this.modalEditor = monaco.editor.create(container, {
+            value: sol.code || '',
+            language: lang,
+            theme: 'vs-dark',
+            automaticLayout: true,
+            minimap: { enabled: false },
+            readOnly: true,
+            scrollBeyondLastLine: false
+        });
+    }
+
     onLanguageChange(): void {
         if (this.editor) {
             monaco.editor.setModelLanguage(this.editor.getModel(), this.selectedLanguage);
@@ -121,6 +165,9 @@ export class ProblemDetail implements OnInit, AfterViewChecked, OnDestroy {
                 const htmlContent = marked.parse(problem.statement) as string;
                 this.statementHtml.set(this.sanitizer.bypassSecurityTrustHtml(htmlContent));
                 this.isLoading.set(false);
+                if (this.authService.isLoggedIn()) {
+                    this.loadSolutions();
+                }
             },
             error: (error) => {
                 console.error('Error loading problem:', error);
@@ -136,6 +183,34 @@ export class ProblemDetail implements OnInit, AfterViewChecked, OnDestroy {
             return;
         }
         this.isSolvingStarted.set(true);
+        this.loadSolutions();
+    }
+
+    private loadSolutions(): void {
+        const p = this.problem();
+        if (!p) return;
+        this.solutionService.getSolutionsForProblem(p.id).subscribe({
+            next: (res) => this.solutions.set(res),
+            error: (err) => console.error('Error loading solutions:', err)
+        });
+    }
+
+    viewSolution(sol: SolutionDto): void {
+        this.viewingSolution.set(sol);
+    }
+
+    closeSolutionModal(): void {
+        this.viewingSolution.set(null);
+        if (this.modalEditor) {
+            this.modalEditor.dispose();
+            this.modalEditor = undefined;
+        }
+    }
+
+    getSubmissionIndex(sol: SolutionDto): number {
+        const index = this.solutions().findIndex(s => s.id === sol.id);
+        if (index === -1) return 0;
+        return this.solutions().length - index;
     }
 
     submitSolution(): void {
@@ -179,6 +254,7 @@ export class ProblemDetail implements OnInit, AfterViewChecked, OnDestroy {
                     if (res.status !== 'IN_QUEUE' && res.status !== 'RUNNING') {
                         clearInterval(this.pollInterval);
                         this.isSubmitting.set(false);
+                        this.loadSolutions();
                     }
                 },
                 error: (err) => {

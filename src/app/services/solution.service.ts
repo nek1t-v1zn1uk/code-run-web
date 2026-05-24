@@ -15,4 +15,8 @@ export class SolutionService {
   getSolution(solutionId: number): Observable<SolutionDto> {
     return this.http.get<SolutionDto>(`${this.base}/solutions/${solutionId}`);
   }
+
+  getSolutionsForProblem(problemId: number): Observable<SolutionDto[]> {
+    return this.http.get<SolutionDto[]>(`${this.base}/problems/${problemId}/solutions`);
+  }
 }

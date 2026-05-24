@@ -23,7 +23,13 @@
                     <span class="back-icon">←</span>
                     Back
                 </button>
+                <div class="left-pane-tabs">
+                    <button class="tab-btn" [class.active]="activeLeftTab() === 'description'" (click)="activeLeftTab.set('description')">Description</button>
+                    <button class="tab-btn" [class.active]="activeLeftTab() === 'submissions'" (click)="activeLeftTab.set('submissions')">Submissions <span class="tab-badge" *ngIf="solutions().length">{{ solutions().length }}</span></button>
+                </div>
             </div>
+            
+            @if (activeLeftTab() === 'description') {
             <div class="problem-content">
                 <div class="title-section">
                     <div class="title-row">
@@ -78,6 +84,45 @@
                 </div>
                 }
             </div>
+            }
+
+            @if (activeLeftTab() === 'submissions') {
+            <div class="problem-content submissions-content">
+                @if (solutions().length > 0) {
+                <div class="solutions-history">
+                    <div class="history-list">
+                        @for (sol of solutions(); track sol.id) {
+                        <div class="history-item clickable" [ngClass]="'status-' + sol.status.toLowerCase()" (click)="viewSolution(sol)">
+                            <div class="item-main">
+                                <div class="item-header">
+                                    <span class="status-badge solid-badge">{{ sol.status.replace('_', ' ') }}</span>
+                                    <span class="lang-badge">{{ sol.language?.language | uppercase }}</span>
+                                </div>
+                                <span class="sent-time">{{ formatDate(sol.sent_at) }}</span>
+                            </div>
+                            <div class="item-details">
+                                @if (sol.test_case_reached) {
+                                    <span class="detail-pill">Failed on Test #{{ sol.test_case_reached }}</span>
+                                }
+                                @if (sol.status === 'TIME_LIMIT_EXCEEDED' && sol.execution_time_ms) {
+                                    <span class="detail-pill time-pill">⏱️ {{ sol.execution_time_ms }} ms</span>
+                                }
+                                @if (sol.status === 'MEMORY_LIMIT_EXCEEDED' && sol.execution_memory_kb) {
+                                    <span class="detail-pill memory-pill">💾 {{ sol.execution_memory_kb / 1024 | number:'1.0-2' }} MB</span>
+                                }
+                            </div>
+                        </div>
+                        }
+                    </div>
+                </div>
+                } @else {
+                    <div class="empty-state">
+                        <span class="empty-icon">📝</span>
+                        <p>You haven't submitted any solutions for this problem yet.</p>
+                    </div>
+                }
+            </div>
+            }
         </div>
 
         @if (isSolvingStarted()) {
@@ -140,3 +185,22 @@
     </div>
     }
 </div>
+
+@if (viewingSolution()) {
+<div class="modal-overlay" (click)="closeSolutionModal()">
+    <div class="modal-container premium-glass" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>Submission #{{ getSubmissionIndex(viewingSolution()!) }}</h3>
+            <button class="btn-close" (click)="closeSolutionModal()">×</button>
+        </div>
+        <div class="modal-meta">
+            <span class="status-badge solid-badge" [ngClass]="'status-' + viewingSolution()!.status.toLowerCase()">{{ viewingSolution()!.status.replace('_', ' ') }}</span>
+            <span class="lang-badge">{{ viewingSolution()!.language?.language | uppercase }}</span>
+            <span class="sent-time">{{ formatDate(viewingSolution()!.sent_at) }}</span>
+        </div>
+        <div class="modal-body modal-editor-wrapper">
+            <div #modalCodeEditor class="monaco-container modal-monaco"></div>
+        </div>
+    </div>
+</div>
+}
