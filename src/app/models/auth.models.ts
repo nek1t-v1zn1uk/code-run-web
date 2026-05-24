@@ -21,4 +21,5 @@ export interface LoginResponse {
     email: string;
     access_token: string;
     expire_date: string;
+    role: string;
 }

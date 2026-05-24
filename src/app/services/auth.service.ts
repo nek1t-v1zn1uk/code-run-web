@@ -17,6 +17,7 @@ export class AuthService {
   private baseUrl = `${environment.apiUrl}/v1/auth`;
   private readonly TOKEN_KEY = 'access_token';
   private readonly EMAIL_KEY = 'user_email';
+  private readonly ROLE_KEY = 'user_role';
 
   register(data: RegisterRequest): Observable<RegisterResponse> {
     return this.http.post<RegisterResponse>(`${this.baseUrl}/register`, data);
@@ -33,11 +34,13 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.EMAIL_KEY);
+    localStorage.removeItem(this.ROLE_KEY);
   }
 
   private setSession(authResult: LoginResponse): void {
     localStorage.setItem(this.TOKEN_KEY, authResult.access_token);
     localStorage.setItem(this.EMAIL_KEY, authResult.email);
+    localStorage.setItem(this.ROLE_KEY, authResult.role);
   }
 
   getToken(): string | null {
@@ -50,5 +53,9 @@ export class AuthService {
 
   getUserEmail(): string | null {
     return localStorage.getItem(this.EMAIL_KEY);
+  }
+
+  isAdmin(): boolean {
+    return localStorage.getItem(this.ROLE_KEY) === 'ADMIN';
   }
 }

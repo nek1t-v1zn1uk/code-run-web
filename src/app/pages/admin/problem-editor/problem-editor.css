@@ -2,7 +2,7 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    min-height: 100vh;
+    min-height: 100%;
     background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
 }
 
@@ -121,6 +121,10 @@
     align-items: start;
 }
 
+.editor-layout.full-width {
+    grid-template-columns: 1fr;
+}
+
 .premium-glass {
     background: rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(15px);
@@ -131,11 +135,10 @@
 
 /* Sidebar Navigation */
 .editor-sidebar {
-    padding: 1.5rem 0 0;
     position: sticky;
     top: 2rem;
     height: fit-content;
-    max-height: calc(100vh - 8rem);
+    max-height: calc(100vh - 20rem);
     display: flex;
     flex-direction: column;
 }
@@ -143,7 +146,7 @@
 .sidebar-content {
     flex: 1;
     overflow-y: auto;
-    padding-top: 1.5rem;
+    padding-top: 1rem;
 }
 
 .master-list-sidebar {
@@ -157,6 +160,14 @@
     flex-direction: column;
     gap: 0.5rem;
     padding: 0 1rem;
+}
+
+.horizontal-tabs {
+    flex-direction: row;
+    padding: 0.5rem;
+    margin-bottom: 2rem;
+    gap: 1rem;
+    border-radius: 12px;
 }
 
 .tabs-nav button {
@@ -173,6 +184,12 @@
     text-align: left;
     cursor: pointer;
     transition: all 0.2s;
+}
+
+.horizontal-tabs button {
+    flex: 1;
+    justify-content: center;
+    text-align: center;
 }
 
 .tabs-nav button:hover {
@@ -340,7 +357,8 @@
 
 .pane-header h3 {
     margin: 0;
-    font-size: 1rem;
+    font-size: 1.3rem;
+    font-weight: 700;
     color: #ffffff;
 }
 
@@ -376,8 +394,8 @@
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 14px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    gap: 0.75rem;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -394,21 +412,46 @@
     box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.2);
 }
 
-.test-card .card-info {
+.card-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 1rem;
-    flex: 1; /* Ensure it takes available space */
+    width: 100%;
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
 }
 
 .test-card .title-text {
     font-weight: 600;
-    color: #ffffff; /* Fix black color */
+    color: #ffffff;
+    font-size: 0.95rem;
 }
 
-.test-card .ordinal {
-    font-weight: 700;
-    color: #667eea;
+.preview-text {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.75rem;
+    color: #a0aec0;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.preview-text.empty {
+    font-style: italic;
+    color: #718096;
+    background: transparent;
+    border-color: transparent;
+    padding-left: 0;
 }
 
 .badge {
@@ -419,13 +462,12 @@
     font-weight: 700;
     text-transform: uppercase;
     color: #8a8aa3;
+    display: inline-block;
 }
 
 .badge.lang {
     background: rgba(102, 126, 234, 0.1);
     color: #667eea;
-    margin-left: auto; /* Align to the right */
-    margin-right: 1rem; /* Gap before actions */
 }
 
 .badge.example {
