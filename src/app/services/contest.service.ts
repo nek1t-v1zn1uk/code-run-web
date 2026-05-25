@@ -9,7 +9,8 @@ import {
     CreateContestRequest,
     AddContestProblemRequest,
     UpdateContestProblemsRequest,
-    UpdateContestRequest
+    UpdateContestRequest,
+    ContestProgressDto
 } from '../models/contest.models';
 
 @Injectable({
@@ -57,5 +58,9 @@ export class ContestService {
 
     hasJoinedContest(id: number): Observable<{hasJoined: boolean}> {
         return this.http.get<{hasJoined: boolean}>(`${this.baseUrl}/${id}/has-joined`);
+    }
+
+    getUserProgress(id: number): Observable<ContestProgressDto> {
+        return this.http.get<ContestProgressDto>(`${this.baseUrl}/${id}/progress`);
     }
 }

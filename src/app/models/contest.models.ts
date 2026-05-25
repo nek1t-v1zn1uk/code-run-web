@@ -23,6 +23,20 @@ export interface ContestMemberDto {
     result_place: number | null;
 }
 
+export interface ProblemStatDto {
+    problem_id: number;
+    is_solved: boolean;
+    unsuccessful_count: number;
+    score: number;
+}
+
+export interface ContestProgressDto {
+    solved_count: number;
+    total_unsuccessful: number;
+    total_score: number;
+    problem_stats: { [key: number]: ProblemStatDto };
+}
+
 export interface CreateContestRequest {
     name?: string | null;
     overview?: string | null;

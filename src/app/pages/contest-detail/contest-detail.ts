@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ContestService } from '../../services/contest.service';
 import { ProblemService } from '../../services/problem.service';
-import { ContestDto, ContestProblemDto, ContestMemberDto } from '../../models/contest.models';
+import { ContestDto, ContestProblemDto, ContestMemberDto, ContestProgressDto } from '../../models/contest.models';
 import { ProblemDto } from '../../models/problem.models';
 import { forkJoin, map, Observable, of, switchMap, catchError } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
@@ -23,6 +23,7 @@ export class ContestDetail implements OnInit {
     protected readonly contest = signal<ContestDto | null>(null);
     protected readonly problems = signal<ContestProblemWithDetails[]>([]);
     protected readonly members = signal<ContestMemberDto[]>([]);
+    protected readonly progress = signal<ContestProgressDto | null>(null);
     protected readonly isLoading = signal<boolean>(true);
     protected readonly isJoining = signal<boolean>(false);
     protected readonly hasJoined = signal<boolean>(false);
@@ -88,6 +89,9 @@ export class ContestDetail implements OnInit {
             requests.hasJoined = this.contestService.hasJoinedContest(id).pipe(
                 catchError(() => of({ hasJoined: false }))
             );
+            requests.progress = this.contestService.getUserProgress(id).pipe(
+                catchError(() => of(null))
+            );
         }
 
         forkJoin(requests).subscribe({
@@ -97,6 +101,9 @@ export class ContestDetail implements OnInit {
                 this.members.set(data.members);
                 if (data.hasJoined) {
                     this.hasJoined.set(data.hasJoined.hasJoined);
+                }
+                if (data.progress) {
+                    this.progress.set(data.progress);
                 }
                 this.isLoading.set(false);
                 this.startTimer();

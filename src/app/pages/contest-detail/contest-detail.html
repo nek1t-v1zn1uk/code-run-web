@@ -96,6 +96,29 @@
                     </div>
                 }
 
+                @if (progress()) {
+                    <div class="personal-dashboard section mb-4">
+                        <div class="dashboard-header">
+                            <span class="icon">📊</span>
+                            <h3>Your Progress</h3>
+                        </div>
+                        <div class="progress-stats-grid">
+                            <div class="progress-card">
+                                <div class="prog-label">Solved</div>
+                                <div class="prog-value">{{ progress()!.solved_count }} / {{ problems().length }}</div>
+                            </div>
+                            <div class="progress-card penalty">
+                                <div class="prog-label">Penalties</div>
+                                <div class="prog-value">{{ progress()!.total_unsuccessful }}</div>
+                            </div>
+                            <div class="progress-card score">
+                                <div class="prog-label">Total Score</div>
+                                <div class="prog-value">{{ progress()!.total_score }}</div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
                 <div class="section problems-section mt-4">
                     <h2 class="section-title">
                         <span class="icon">📝</span> Problems
@@ -110,6 +133,17 @@
                     <div class="problems-list">
                         @for (cp of problems(); track cp.id) {
                         <div class="problem-card" (click)="navigateToProblem(cp.problem_id)">
+                            @if (progress()) {
+                                <div class="problem-status-icon">
+                                    @if (progress()!.problem_stats[cp.problem_id]?.is_solved) {
+                                        <span class="solved-icon" title="Solved">✅</span>
+                                    } @else if ((progress()!.problem_stats[cp.problem_id]?.unsuccessful_count || 0) > 0) {
+                                        <span class="failed-icon" title="Attempted">❌</span>
+                                    } @else {
+                                        <span class="unattempted-icon"></span>
+                                    }
+                                </div>
+                            }
                             <div class="problem-ordinal">{{ cp.ordinal }}</div>
                             <div class="problem-info">
                                 <h3 class="problem-title">{{ cp.problemDetails?.title || 'Unknown Problem' }}</h3>
@@ -120,6 +154,18 @@
                                     <span class="meta-badge" *ngIf="cp.problemDetails?.topic">
                                         {{ cp.problemDetails?.topic?.name }}
                                     </span>
+                                    @if (progress() && progress()!.problem_stats[cp.problem_id]) {
+                                        @if (progress()!.problem_stats[cp.problem_id].unsuccessful_count > 0) {
+                                            <span class="meta-badge penalty-badge">
+                                                {{ progress()!.problem_stats[cp.problem_id].unsuccessful_count }} tries
+                                            </span>
+                                        }
+                                        @if (progress()!.problem_stats[cp.problem_id].is_solved) {
+                                            <span class="meta-badge score-badge">
+                                                {{ progress()!.problem_stats[cp.problem_id].score }} pts
+                                            </span>
+                                        }
+                                    }
                                 </div>
                             </div>
                             <div class="view-arrow">→</div>
