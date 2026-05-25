@@ -3,10 +3,11 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ContestService } from '../../services/contest.service';
 import { ProblemService } from '../../services/problem.service';
-import { ContestDto, ContestProblemDto, ContestMemberDto, ContestProgressDto } from '../../models/contest.models';
+import { ContestDto, ContestProblemDto, ContestMemberDto, ContestProgressDto, ScoreboardDto } from '../../models/contest.models';
 import { ProblemDto } from '../../models/problem.models';
-import { forkJoin, map, Observable, of, switchMap, catchError } from 'rxjs';
+import { forkJoin, map, Observable, of, switchMap, catchError, Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
+import { ScoreboardWebSocketService } from '../../services/scoreboard-ws.service';
 
 interface ContestProblemWithDetails extends ContestProblemDto {
     problemDetails?: ProblemDto;
@@ -24,6 +25,7 @@ export class ContestDetail implements OnInit {
     protected readonly problems = signal<ContestProblemWithDetails[]>([]);
     protected readonly members = signal<ContestMemberDto[]>([]);
     protected readonly progress = signal<ContestProgressDto | null>(null);
+    protected readonly scoreboard = signal<ScoreboardDto | null>(null);
     protected readonly isLoading = signal<boolean>(true);
     protected readonly isJoining = signal<boolean>(false);
     protected readonly hasJoined = signal<boolean>(false);
@@ -33,13 +35,15 @@ export class ContestDetail implements OnInit {
     protected readonly timeUntilFreeze = signal<string>('');
     protected readonly isFreezeTime = signal<boolean>(false);
     private timerInterval: any;
+    private scoreboardSub: Subscription | null = null;
 
     constructor(
         private route: ActivatedRoute,
         private router: Router,
         private contestService: ContestService,
         private problemService: ProblemService,
-        private authService: AuthService
+        private authService: AuthService,
+        private scoreboardWsService: ScoreboardWebSocketService
     ) { }
 
     ngOnInit(): void {
@@ -57,10 +61,15 @@ export class ContestDetail implements OnInit {
                 this.activeTab.set(tab);
             }
         });
+
+        this.scoreboardSub = this.scoreboardWsService.scoreboard$.subscribe(scoreboard => {
+            this.scoreboard.set(scoreboard);
+        });
     }
 
     ngOnDestroy(): void {
         if (this.timerInterval) clearInterval(this.timerInterval);
+        if (this.scoreboardSub) this.scoreboardSub.unsubscribe();
     }
 
     private loadContestData(id: number): void {
@@ -82,6 +91,9 @@ export class ContestDetail implements OnInit {
             ),
             members: this.contestService.getContestMembers(id).pipe(
                 catchError(() => of([]))
+            ),
+            scoreboard: this.contestService.getScoreboard(id).pipe(
+                catchError(() => of(null))
             )
         };
 
@@ -105,6 +117,10 @@ export class ContestDetail implements OnInit {
                 if (data.progress) {
                     this.progress.set(data.progress);
                 }
+                if (data.scoreboard) {
+                    this.scoreboardWsService.setInitialScoreboard(data.scoreboard);
+                }
+                this.scoreboardWsService.subscribeToContestScoreboard(id);
                 this.isLoading.set(false);
                 this.startTimer();
             },

@@ -178,10 +178,69 @@
         }
 
         @if (activeTab() === 'scoreboard') {
-            <div class="empty-state section">
-                <span class="empty-icon">🏆</span>
-                <h2>Scoreboard</h2>
-                <p>Scoreboard will be available soon.</p>
+            <div class="scoreboard-section section">
+                <div class="dashboard-header">
+                    <span class="icon">🏆</span>
+                    <h2>Live Scoreboard</h2>
+                </div>
+                
+                @if (scoreboard() && scoreboard()!.rows.length > 0) {
+                    <div class="table-responsive">
+                        <table class="scoreboard-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-rank">#</th>
+                                    <th class="col-user">Contestant</th>
+                                    <th class="col-solved">Solved</th>
+                                    <th class="col-penalty">Penalty</th>
+                                    @for (cp of problems(); track cp.id) {
+                                        <th class="col-problem" title="{{ cp.problemDetails?.title }}">{{ cp.ordinal }}</th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (row of scoreboard()!.rows; track row.user_id; let i = $index) {
+                                    <tr>
+                                        <td class="col-rank">{{ i + 1 }}</td>
+                                        <td class="col-user">{{ row.username }}</td>
+                                        <td class="col-solved">{{ row.solved_count }}</td>
+                                        <td class="col-penalty">{{ row.total_score }}</td>
+                                        @for (cp of problems(); track cp.id) {
+                                            <td class="col-problem">
+                                                @if (row.problem_stats[cp.problem_id]) {
+                                                    @if (row.problem_stats[cp.problem_id].is_solved) {
+                                                        <div class="stat-cell solved">
+                                                            <div class="stat-main">+{{ row.problem_stats[cp.problem_id].unsuccessful_count }}</div>
+                                                            <div class="stat-sub">{{ row.problem_stats[cp.problem_id].score }} pts</div>
+                                                        </div>
+                                                    } @else if (row.problem_stats[cp.problem_id].unsuccessful_count > 0) {
+                                                        <div class="stat-cell failed">
+                                                            <div class="stat-main">-{{ row.problem_stats[cp.problem_id].unsuccessful_count }}</div>
+                                                        </div>
+                                                    } @else if (row.problem_stats[cp.problem_id].frozen_attempts > 0) {
+                                                        <div class="stat-cell frozen">
+                                                            <div class="stat-main">?</div>
+                                                            <div class="stat-sub">{{ row.problem_stats[cp.problem_id].frozen_attempts }} tries</div>
+                                                        </div>
+                                                    } @else {
+                                                        <div class="stat-cell empty"></div>
+                                                    }
+                                                } @else {
+                                                    <div class="stat-cell empty"></div>
+                                                }
+                                            </td>
+                                        }
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                } @else {
+                    <div class="empty-state">
+                        <span class="empty-icon">👥</span>
+                        <p>No scoreboard data available yet.</p>
+                    </div>
+                }
             </div>
         }
     </div>

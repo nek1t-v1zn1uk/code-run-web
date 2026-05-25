@@ -513,6 +513,67 @@
     border: 1px solid rgba(76, 209, 55, 0.3);
 }
 
+/* Scoreboard Table */
+.table-responsive {
+    overflow-x: auto;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.scoreboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+.scoreboard-table th, .scoreboard-table td {
+    padding: 1rem;
+    text-align: center;
+    border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.scoreboard-table th {
+    background: rgba(0, 0, 0, 0.3);
+    color: #a0a0b0;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.scoreboard-table td.col-user {
+    text-align: left;
+    font-weight: 600;
+    color: #e0e0e0;
+}
+
+.scoreboard-table tbody tr:hover {
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.col-rank { width: 60px; font-weight: bold; }
+.col-solved { color: #4cd137; font-weight: bold; }
+.col-penalty { color: #ff6b6b; font-weight: bold; }
+.col-problem { min-width: 70px; }
+
+.stat-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+    border-radius: 6px;
+    min-height: 44px;
+}
+
+.stat-cell.solved { background: rgba(76, 209, 55, 0.1); color: #4cd137; }
+.stat-cell.failed { background: rgba(255, 107, 107, 0.1); color: #ff6b6b; }
+.stat-cell.frozen { background: rgba(72, 198, 239, 0.1); color: #48c6ef; }
+
+.stat-main { font-weight: 700; font-size: 1.1rem; }
+.stat-sub { font-size: 0.75rem; opacity: 0.8; margin-top: 2px; }
+
 @keyframes pulse {
     0% { transform: scale(1); }
     50% { transform: scale(1.1); }

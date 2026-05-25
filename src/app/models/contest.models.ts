@@ -37,6 +37,27 @@ export interface ContestProgressDto {
     problem_stats: { [key: number]: ProblemStatDto };
 }
 
+export interface ScoreboardDto {
+    contest_id: number;
+    rows: ScoreboardRowDto[];
+}
+
+export interface ScoreboardRowDto {
+    user_id: number;
+    username: string;
+    solved_count: number;
+    total_score: number;
+    problem_stats: { [key: number]: ScoreboardProblemStatDto };
+}
+
+export interface ScoreboardProblemStatDto {
+    problem_id: number;
+    is_solved: boolean;
+    unsuccessful_count: number;
+    frozen_attempts: number;
+    score: number;
+}
+
 export interface CreateContestRequest {
     name?: string | null;
     overview?: string | null;
