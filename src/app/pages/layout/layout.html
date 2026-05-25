@@ -8,6 +8,20 @@
     </div>
 
     <nav class="nav-menu">
+      @if (activeContestId()) {
+        <p class="nav-label">Contest Workspace</p>
+        <a [routerLink]="['/contests', activeContestId(), 'overview']" routerLinkActive="active" class="nav-item">
+          <span class="icon">📊</span> Overview
+        </a>
+        <a [routerLink]="['/contests', activeContestId(), 'contesting']" routerLinkActive="active" class="nav-item">
+          <span class="icon">⚔️</span> Contesting
+        </a>
+        <a [routerLink]="['/contests', activeContestId(), 'scoreboard']" routerLinkActive="active" class="nav-item">
+          <span class="icon">🏆</span> Scoreboard
+        </a>
+        <hr class="nav-divider">
+      }
+
       <p class="nav-label">Main Menu</p>
       <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item">
         <span class="icon">🏠</span> Home

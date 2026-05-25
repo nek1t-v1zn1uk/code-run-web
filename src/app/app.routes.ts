@@ -38,6 +38,15 @@ export const routes: Routes = [
             },
             {
                 path: 'contests/:id',
+                redirectTo: 'contests/:id/overview',
+                pathMatch: 'full'
+            },
+            {
+                path: 'contests/:contestId/problems/:id',
+                loadComponent: () => import('./pages/problem-detail/problem-detail').then(m => m.ProblemDetail)
+            },
+            {
+                path: 'contests/:id/:tab',
                 loadComponent: () => import('./pages/contest-detail/contest-detail').then(m => m.ContestDetail)
             },
             {

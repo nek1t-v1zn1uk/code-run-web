@@ -40,6 +40,7 @@ export class ProblemDetail implements OnInit, AfterViewChecked, OnDestroy {
     availableLangs = ['python', 'c', 'cpp', 'java', 'kotlin'];
     selectedLanguage = 'python';
     currentCode = '';
+    contestId: number | null = null;
 
     isSubmitting = signal(false);
     solutionResult = signal<SolutionDto | null>(null);
@@ -61,6 +62,10 @@ export class ProblemDetail implements OnInit, AfterViewChecked, OnDestroy {
     ngOnInit(): void {
         this.route.params.subscribe(params => {
             const id = Number(params['id']);
+            const contestId = Number(params['contestId']);
+            if (contestId) {
+                this.contestId = contestId;
+            }
             if (id) {
                 this.loadProblem(id);
             }
@@ -230,6 +235,10 @@ export class ProblemDetail implements OnInit, AfterViewChecked, OnDestroy {
             language_version: null
         };
 
+        if (this.contestId) {
+            req.contest_id = this.contestId;
+        }
+
         this.solutionService.sendSolution(p.id, req).subscribe({
             next: (res) => {
                 this.solutionResult.set(res);
@@ -267,7 +276,11 @@ export class ProblemDetail implements OnInit, AfterViewChecked, OnDestroy {
     }
 
     protected goBack(): void {
-        this.router.navigate(['/problems']);
+        if (this.contestId) {
+            this.router.navigate(['/contests', this.contestId, 'contesting']);
+        } else {
+            this.router.navigate(['/problems']);
+        }
     }
 
     protected getDifficultyClass(difficulty: string): string {

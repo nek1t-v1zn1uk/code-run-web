@@ -27,4 +27,6 @@ export interface SendSolutionRequest {
   code: string;
   language: string;
   language_version?: string | null;
+  contest_id?: number | null;
+  contest_problem_id?: number | null;
 }

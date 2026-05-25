@@ -54,4 +54,8 @@ export class ContestService {
     joinContest(id: number): Observable<ContestMemberDto> {
         return this.http.post<ContestMemberDto>(`${this.baseUrl}/${id}/join`, {});
     }
+
+    hasJoinedContest(id: number): Observable<{hasJoined: boolean}> {
+        return this.http.get<{hasJoined: boolean}>(`${this.baseUrl}/${id}/has-joined`);
+    }
 }

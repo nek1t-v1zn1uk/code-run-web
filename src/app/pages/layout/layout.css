@@ -93,14 +93,19 @@
 
 .nav-item:hover {
   background: rgba(255, 255, 255, 0.05);
-  color: #fff;
-  transform: translateX(4px);
+  color: #ffffff;
 }
 
 .nav-item.active {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
-  color: #fff;
-  border-left: 3px solid #667eea;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  color: #667eea;
+  border-right: 3px solid #667eea;
+}
+
+.nav-divider {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 1.5rem 1rem 0.5rem 1rem;
 }
 
 .nav-item .icon {

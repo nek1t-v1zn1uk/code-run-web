@@ -12,83 +12,132 @@
                 {{ getStatus() }}
             </span>
         </div>
-        <p class="subtitle">{{ contest()?.overview }}</p>
-        
-        <div class="meta-info">
-            <div class="meta-item">
-                <span class="meta-icon">🕒</span>
-                <strong>Start:</strong> {{ formatDate(contest()?.start_time) }}
-            </div>
-            <div class="meta-item">
-                <span class="meta-icon">🏁</span>
-                <strong>End:</strong> {{ formatDate(contest()?.end_time) }}
-            </div>
-            <div class="meta-item">
-                <span class="meta-icon">👥</span>
-                <strong>Participants:</strong> {{ members().length }}
-            </div>
-        </div>
-
-        <div class="actions">
-            @if (getStatus() === 'Upcoming' || getStatus() === 'Running') {
-                <button class="btn-join" (click)="joinContest()" [disabled]="hasJoined() || isJoining()">
-                    @if (isJoining()) {
-                        <span class="spinner-small"></span> Joining...
-                    } @else if (hasJoined()) {
-                        <span class="icon">✅</span> Joined
-                    } @else {
-                        Join Contest
-                    }
-                </button>
-            }
-        </div>
     </header>
 
-    <div class="content-grid">
-        <div class="main-column">
-            <div class="section problems-section">
-                <h2 class="section-title">
-                    <span class="icon">📝</span> Problems
-                </h2>
-                
-                @if (problems().length === 0) {
-                <div class="empty-state">
-                    <p>No problems available yet.</p>
-                </div>
-                } @else {
-                <div class="problems-list">
-                    @for (cp of problems(); track cp.id) {
-                    <div class="problem-card" (click)="navigateToProblem(cp.problem_id)">
-                        <div class="problem-ordinal">{{ cp.ordinal }}</div>
-                        <div class="problem-info">
-                            <h3 class="problem-title">{{ cp.problemDetails?.title || 'Unknown Problem' }}</h3>
-                            <div class="problem-meta">
-                                <span class="meta-badge" *ngIf="cp.problemDetails?.difficulty">
-                                    {{ cp.problemDetails?.difficulty }}
-                                </span>
-                                <span class="meta-badge" *ngIf="cp.problemDetails?.topic">
-                                    {{ cp.problemDetails?.topic?.name }}
-                                </span>
+    <div class="content-wrapper">
+        @if (activeTab() === 'overview') {
+            <div class="content-grid">
+                <div class="main-column">
+                    <div class="section overview-section">
+                        <div class="meta-info">
+                            <div class="meta-item">
+                                <span class="meta-icon">🕒</span>
+                                <strong>Start:</strong> {{ formatDate(contest()?.start_time) }}
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-icon">🏁</span>
+                                <strong>End:</strong> {{ formatDate(contest()?.end_time) }}
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-icon">👥</span>
+                                <strong>Participants:</strong> {{ members().length }}
                             </div>
                         </div>
-                        <div class="view-arrow">→</div>
+                        
+                        <p class="subtitle">{{ contest()?.overview }}</p>
+
+                        <div class="actions">
+                            @if (getStatus() === 'Upcoming' || getStatus() === 'Running') {
+                                <button class="btn-join" (click)="joinContest()" [disabled]="hasJoined() || isJoining()">
+                                    @if (isJoining()) {
+                                        <span class="spinner-small"></span> Joining...
+                                    } @else if (hasJoined()) {
+                                        <span class="icon">✅</span> Joined
+                                    } @else {
+                                        Join Contest
+                                    }
+                                </button>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="section rules-section">
+                        <h2 class="section-title">
+                            <span class="icon">📜</span> Rules
+                        </h2>
+                        <div class="rules-content">
+                            {{ contest()?.rules || 'No specific rules provided.' }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (activeTab() === 'contesting') {
+            @if (getStatus() === 'Upcoming') {
+                <div class="countdown-container">
+                    <span class="countdown-icon">⏳</span>
+                    <h2>Contest starts in</h2>
+                    <div class="countdown-timer">{{ timeUntilStart() }}</div>
+                </div>
+            } @else {
+                @if (getStatus() === 'Running') {
+                    <div class="active-contest-dashboard section">
+                        <div class="dashboard-stats">
+                            <div class="stat-card timer-card">
+                                <div class="stat-label">Ends In</div>
+                                <div class="stat-value">{{ timeUntilEnd() }}</div>
+                            </div>
+                            @if (contest()?.freeze_time) {
+                                <div class="stat-card freeze-card" [class.frozen]="isFreezeTime()">
+                                    <div class="stat-label">
+                                        {{ isFreezeTime() ? 'Scoreboard Status' : 'Freeze In' }}
+                                    </div>
+                                    <div class="stat-value">
+                                        @if (isFreezeTime()) {
+                                            <span class="frozen-text">❄️ FROZEN</span>
+                                        } @else {
+                                            {{ timeUntilFreeze() }}
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <div class="section problems-section mt-4">
+                    <h2 class="section-title">
+                        <span class="icon">📝</span> Problems
+                    </h2>
+                    
+                    @if (problems().length === 0) {
+                    <div class="empty-state">
+                        <span class="empty-icon">📂</span>
+                        <p>No problems available yet.</p>
+                    </div>
+                    } @else {
+                    <div class="problems-list">
+                        @for (cp of problems(); track cp.id) {
+                        <div class="problem-card" (click)="navigateToProblem(cp.problem_id)">
+                            <div class="problem-ordinal">{{ cp.ordinal }}</div>
+                            <div class="problem-info">
+                                <h3 class="problem-title">{{ cp.problemDetails?.title || 'Unknown Problem' }}</h3>
+                                <div class="problem-meta">
+                                    <span class="meta-badge" *ngIf="cp.problemDetails?.difficulty">
+                                        {{ cp.problemDetails?.difficulty }}
+                                    </span>
+                                    <span class="meta-badge" *ngIf="cp.problemDetails?.topic">
+                                        {{ cp.problemDetails?.topic?.name }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="view-arrow">→</div>
+                        </div>
+                        }
                     </div>
                     }
                 </div>
-                }
-            </div>
-        </div>
+            }
+        }
 
-        <div class="side-column">
-            <div class="section rules-section">
-                <h2 class="section-title">
-                    <span class="icon">📜</span> Rules
-                </h2>
-                <div class="rules-content">
-                    {{ contest()?.rules || 'No specific rules provided.' }}
-                </div>
+        @if (activeTab() === 'scoreboard') {
+            <div class="empty-state section">
+                <span class="empty-icon">🏆</span>
+                <h2>Scoreboard</h2>
+                <p>Scoreboard will be available soon.</p>
             </div>
-        </div>
+        }
     </div>
     }
 </div>

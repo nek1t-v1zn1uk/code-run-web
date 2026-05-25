@@ -6,6 +6,7 @@ import { ProblemService } from '../../services/problem.service';
 import { ContestDto, ContestProblemDto, ContestMemberDto } from '../../models/contest.models';
 import { ProblemDto } from '../../models/problem.models';
 import { forkJoin, map, Observable, of, switchMap, catchError } from 'rxjs';
+import { AuthService } from '../../services/auth.service';
 
 interface ContestProblemWithDetails extends ContestProblemDto {
     problemDetails?: ProblemDto;
@@ -25,27 +26,46 @@ export class ContestDetail implements OnInit {
     protected readonly isLoading = signal<boolean>(true);
     protected readonly isJoining = signal<boolean>(false);
     protected readonly hasJoined = signal<boolean>(false);
+    protected readonly activeTab = signal<'overview' | 'contesting' | 'scoreboard'>('overview');
+    protected readonly timeUntilStart = signal<string>('');
+    protected readonly timeUntilEnd = signal<string>('');
+    protected readonly timeUntilFreeze = signal<string>('');
+    protected readonly isFreezeTime = signal<boolean>(false);
+    private timerInterval: any;
 
     constructor(
         private route: ActivatedRoute,
         private router: Router,
         private contestService: ContestService,
-        private problemService: ProblemService
+        private problemService: ProblemService,
+        private authService: AuthService
     ) { }
 
     ngOnInit(): void {
-        const id = this.route.snapshot.paramMap.get('id');
-        if (id) {
-            this.loadContestData(+id);
-        } else {
-            this.router.navigate(['/contests']);
-        }
+        this.route.paramMap.subscribe(params => {
+            const id = params.get('id');
+            const tab = params.get('tab') as 'overview' | 'contesting' | 'scoreboard';
+
+            if (id && this.contest()?.id !== +id) {
+                this.loadContestData(+id);
+            } else if (!id) {
+                this.router.navigate(['/contests']);
+            }
+
+            if (tab) {
+                this.activeTab.set(tab);
+            }
+        });
+    }
+
+    ngOnDestroy(): void {
+        if (this.timerInterval) clearInterval(this.timerInterval);
     }
 
     private loadContestData(id: number): void {
         this.isLoading.set(true);
 
-        forkJoin({
+        const requests: any = {
             contest: this.contestService.getContestById(id),
             problems: this.contestService.getContestProblems(id).pipe(
                 switchMap(contestProblems => {
@@ -62,14 +82,24 @@ export class ContestDetail implements OnInit {
             members: this.contestService.getContestMembers(id).pipe(
                 catchError(() => of([]))
             )
-        }).subscribe({
-            next: (data) => {
+        };
+
+        if (this.authService.isLoggedIn()) {
+            requests.hasJoined = this.contestService.hasJoinedContest(id).pipe(
+                catchError(() => of({ hasJoined: false }))
+            );
+        }
+
+        forkJoin(requests).subscribe({
+            next: (data: any) => {
                 this.contest.set(data.contest);
-                this.problems.set(data.problems.sort((a, b) => a.ordinal - b.ordinal));
+                this.problems.set(data.problems.sort((a: any, b: any) => a.ordinal - b.ordinal));
                 this.members.set(data.members);
-                // Currently, we don't have a direct way to check if current user is in members list without User context.
-                // Assuming hasJoined logic based on some user context or letting API return 400.
+                if (data.hasJoined) {
+                    this.hasJoined.set(data.hasJoined.hasJoined);
+                }
                 this.isLoading.set(false);
+                this.startTimer();
             },
             error: (error) => {
                 console.error('Error loading contest:', error);
@@ -103,7 +133,7 @@ export class ContestDetail implements OnInit {
     protected navigateToProblem(problemId: number): void {
         const contest = this.contest();
         if (!contest) return;
-        this.router.navigate(['/problems', problemId], { queryParams: { contestId: contest.id } });
+        this.router.navigate(['/contests', contest.id, 'problems', problemId]);
     }
 
     protected getStatus(): string {
@@ -139,5 +169,64 @@ export class ContestDetail implements OnInit {
             hour: '2-digit',
             minute: '2-digit'
         });
+    }
+
+    private formatDuration(diff: number): string {
+        if (diff <= 0) return '';
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        
+        if (days > 0) {
+            return `${days}d ${pad(hours)}h ${pad(mins)}m ${pad(secs)}s`;
+        } else {
+            return `${pad(hours)}h ${pad(mins)}m ${pad(secs)}s`;
+        }
+    }
+
+    private startTimer(): void {
+        if (this.timerInterval) clearInterval(this.timerInterval);
+        
+        this.timerInterval = setInterval(() => {
+            const c = this.contest();
+            if (!c) return;
+            
+            const now = new Date().getTime();
+            const start = new Date(c.start_time).getTime();
+            const end = new Date(c.end_time).getTime();
+            const freeze = c.freeze_time ? new Date(c.freeze_time).getTime() : null;
+            
+            if (now < start) {
+                this.timeUntilStart.set(this.formatDuration(start - now));
+                this.timeUntilEnd.set('');
+                this.timeUntilFreeze.set('');
+                this.isFreezeTime.set(false);
+            } else if (now < end) {
+                this.timeUntilStart.set('');
+                this.timeUntilEnd.set(this.formatDuration(end - now));
+                
+                if (freeze) {
+                    if (now < freeze) {
+                        this.timeUntilFreeze.set(this.formatDuration(freeze - now));
+                        this.isFreezeTime.set(false);
+                    } else {
+                        this.timeUntilFreeze.set('');
+                        this.isFreezeTime.set(true);
+                    }
+                } else {
+                    this.timeUntilFreeze.set('');
+                    this.isFreezeTime.set(false);
+                }
+            } else {
+                this.timeUntilStart.set('');
+                this.timeUntilEnd.set('');
+                this.timeUntilFreeze.set('');
+                this.isFreezeTime.set(false);
+                clearInterval(this.timerInterval);
+            }
+        }, 1000);
     }
 }
