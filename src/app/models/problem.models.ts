@@ -13,6 +13,11 @@ export enum EvaluationType {
     SCRIPT_CHECK = 'SCRIPT_CHECK'
 }
 
+export interface ExampleTestDto {
+    input_data: string;
+    expected_output?: string | null;
+}
+
 export interface Topic {
     name: string;
 }
@@ -62,6 +67,7 @@ export interface ProblemDto {
     default_script_checker_id?: number | null;
     created_at: string;
     is_public: boolean;
+    examples?: ExampleTestDto[];
 }
 
 export interface CreateProblemRequest {

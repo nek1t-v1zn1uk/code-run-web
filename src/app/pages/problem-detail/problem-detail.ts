@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProblemService } from '../../services/problem.service';
-import { Problem } from '../../models/problem.models';
+import { ProblemDto } from '../../models/problem.models';
 import { SolutionService } from '../../services/solution.service';
 import { SolutionDto, SendSolutionRequest } from '../../models/solution.models';
 import { AuthService } from '../../services/auth.service';
@@ -24,7 +24,7 @@ marked.use(markedKatex({ throwOnError: false, output: 'html' }));
     styleUrl: './problem-detail.css'
 })
 export class ProblemDetail implements OnInit, AfterViewChecked, OnDestroy {
-    protected readonly problem = signal<Problem | null>(null);
+    protected readonly problem = signal<ProblemDto | null>(null);
     protected readonly isLoading = signal<boolean>(true);
     protected readonly error = signal<string | null>(null);
     protected readonly statementHtml = signal<SafeHtml>('');
@@ -49,6 +49,8 @@ export class ProblemDetail implements OnInit, AfterViewChecked, OnDestroy {
     solutions = signal<SolutionDto[]>([]);
     activeLeftTab = signal<'description' | 'submissions'>('description');
     viewingSolution = signal<SolutionDto | null>(null);
+
+    copiedState: { [key: string]: boolean } = {};
 
     constructor(
         private problemService: ProblemService,
@@ -164,7 +166,7 @@ export class ProblemDetail implements OnInit, AfterViewChecked, OnDestroy {
         this.isLoading.set(true);
         this.error.set(null);
 
-        this.problemService.getProblemById<Problem>(id).subscribe({
+        this.problemService.getProblemById<ProblemDto>(id).subscribe({
             next: (problem) => {
                 this.problem.set(problem);
                 const htmlContent = marked.parse(problem.statement) as string;
@@ -313,6 +315,19 @@ export class ProblemDetail implements OnInit, AfterViewChecked, OnDestroy {
             day: 'numeric',
             hour: '2-digit',
             minute: '2-digit'
+        });
+    }
+
+    copyToClipboard(text: string, type: 'input' | 'output', index: number): void {
+        if (!text) return;
+        navigator.clipboard.writeText(text).then(() => {
+            const key = `${type}-${index}`;
+            this.copiedState[key] = true;
+            setTimeout(() => {
+                this.copiedState[key] = false;
+            }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy text: ', err);
         });
     }
 }

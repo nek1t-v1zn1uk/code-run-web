@@ -72,6 +72,47 @@
                 <div class="section statement-section">
                     <div class="section-content">
                         <div class="statement-text markdown-content" [innerHTML]="statementHtml()"></div>
+
+                        @if (problem()!.examples && problem()!.examples!.length > 0) {
+                        <hr class="examples-divider">
+                        <div class="examples-section">
+                            <h1 class="examples-title markdown-content">Examples</h1>
+                            <div class="examples-list">
+                                @for (example of problem()!.examples; track $index) {
+                                    <div class="example-card">
+                                        <div class="example-block">
+                                            <div class="example-header">
+                                                <span class="example-label">Input</span>
+                                                <button class="copy-btn" (click)="copyToClipboard(example.input_data, 'input', $index)" title="Copy Input">
+                                                    @if (copiedState['input-' + $index]) {
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                                    } @else {
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                                    }
+                                                </button>
+                                            </div>
+                                            <pre class="example-content">{{ example.input_data }}</pre>
+                                        </div>
+                                        @if (example.expected_output) {
+                                            <div class="example-block">
+                                                <div class="example-header">
+                                                    <span class="example-label">Output</span>
+                                                    <button class="copy-btn" (click)="copyToClipboard(example.expected_output, 'output', $index)" title="Copy Output">
+                                                        @if (copiedState['output-' + $index]) {
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                                        } @else {
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                                        }
+                                                    </button>
+                                                </div>
+                                                <pre class="example-content">{{ example.expected_output }}</pre>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        }
                     </div>
                 </div>
 
