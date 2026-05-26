@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, HostListener, signal } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ProblemService } from '../../services/problem.service';
-import { Problem, Topic } from '../../models/problem.models';
+import { ProblemDto, Topic } from '../../models/problem.models';
 
 @Component({
     selector: 'app-problems-list',
@@ -11,7 +11,7 @@ import { Problem, Topic } from '../../models/problem.models';
     styleUrl: './problems-list.css'
 })
 export class ProblemsList implements OnInit, OnDestroy {
-    protected readonly problems = signal<Problem[]>([]);
+    protected readonly problems = signal<ProblemDto[]>([]);
     protected readonly topics = signal<Topic[]>([]);
     protected readonly isLoading = signal<boolean>(true);
     protected readonly isLoadingMore = signal<boolean>(false);
@@ -69,7 +69,7 @@ export class ProblemsList implements OnInit, OnDestroy {
                     this.problems.set([...this.problems(), ...response.content]);
                 }
                 this.hasNext = response.has_next;
-                this.nextCursor = response.next_cursor;
+                this.nextCursor = response.next_cursor || null;
                 this.isLoading.set(false);
                 this.isLoadingMore.set(false);
             },

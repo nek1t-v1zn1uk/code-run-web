@@ -81,7 +81,7 @@
               <select [(ngModel)]="selectedProblemId" [ngModelOptions]="{standalone: true}" class="glass-select problem-select">
                 <option value="" disabled selected>— Select a problem to add —</option>
                 @for (prob of availableToAdd; track prob.id) {
-                  <option [value]="prob.id">{{ prob.title }}</option>
+                  <option [value]="prob.id">{{ prob.title }} {{ !prob.is_public ? '(Hidden)' : '' }}</option>
                 }
               </select>
               <button class="save-btn add-btn" (click)="addProblem()">
@@ -102,7 +102,7 @@
                             [ngModelOptions]="{standalone: true}"
                             (ngModelChange)="changeProblem(i, +$event)">
                       @for (prob of allProblems(); track prob.id) {
-                        <option [value]="prob.id">{{ prob.title }}</option>
+                        <option [value]="prob.id">{{ prob.title }} {{ !prob.is_public ? '(Hidden)' : '' }}</option>
                       }
                     </select>
 

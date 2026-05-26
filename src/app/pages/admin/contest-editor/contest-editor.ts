@@ -7,7 +7,7 @@ import { catchError, map } from 'rxjs/operators';
 import { ContestService } from '../../../services/contest.service';
 import { ProblemService } from '../../../services/problem.service';
 import { CreateContestRequest, ContestProblemDto } from '../../../models/contest.models';
-import { Problem } from '../../../models/problem.models';
+import { ProblemDto } from '../../../models/problem.models';
 
 // Local interface to hold a problem row with its resolved name
 export interface ContestProblemRow {
@@ -49,7 +49,7 @@ export class AdminContestEditor implements OnInit {
   isSavingProblems = signal(false);
 
   // All problems from the backend for the dropdown
-  allProblems = signal<Problem[]>([]);
+  allProblems = signal<ProblemDto[]>([]);
 
   // The ordered list of problems in this contest (with names)
   problemRows = signal<ContestProblemRow[]>([]);
@@ -69,7 +69,7 @@ export class AdminContestEditor implements OnInit {
 
   /** Fetch all available problems for the dropdown */
   private loadAllProblems(): void {
-    this.problemService.getProblems({ limit: 200 }).subscribe({
+    this.problemService.getAdminProblems({ limit: 200 }).subscribe({
       next: (res) => this.allProblems.set(res.content),
       error: (err) => console.error('Failed to load problems', err)
     });
@@ -129,7 +129,7 @@ export class AdminContestEditor implements OnInit {
 
       // Resolve each problem's title by fetching it individually
       const requests = sorted.map(cp =>
-        this.problemService.getProblemById<Problem>(cp.problem_id).pipe(
+        this.problemService.getProblemById<ProblemDto>(cp.problem_id).pipe(
           map(p => ({
             problem_id: cp.problem_id,
             title: p.title,
@@ -299,7 +299,7 @@ export class AdminContestEditor implements OnInit {
   }
 
   /** Helper: problems not yet added, shown in the "add" dropdown */
-  get availableToAdd(): Problem[] {
+  get availableToAdd(): ProblemDto[] {
     const usedIds = new Set(this.problemRows().map(r => r.problem_id));
     return this.allProblems().filter(p => !usedIds.has(p.id));
   }

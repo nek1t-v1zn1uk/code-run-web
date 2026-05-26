@@ -20,7 +20,7 @@ export class ProblemService {
     private http = inject(HttpClient);
     private baseUrl = `${environment.apiUrl}/v1/problems`;
 
-    getProblems(request: ProblemsRequest): Observable<ProblemsResponse> {
+    getProblems(request: ProblemsRequest): Observable<ProblemPageResponse> {
         let params = new HttpParams().set('limit', request.limit.toString());
         if (request.difficulty) {
             params = params.set('difficulty', request.difficulty);
@@ -31,7 +31,21 @@ export class ProblemService {
         if (request.cursor) {
             params = params.set('cursor', request.cursor);
         }
-        return this.http.get<ProblemsResponse>(this.baseUrl, { params });
+        return this.http.get<ProblemPageResponse>(this.baseUrl, { params });
+    }
+
+    getAdminProblems(request: ProblemsRequest): Observable<ProblemPageResponse> {
+        let params = new HttpParams().set('limit', request.limit.toString());
+        if (request.difficulty) {
+            params = params.set('difficulty', request.difficulty);
+        }
+        if (request.topicName) {
+            params = params.set('topicName', request.topicName);
+        }
+        if (request.cursor) {
+            params = params.set('cursor', request.cursor);
+        }
+        return this.http.get<ProblemPageResponse>(`${this.baseUrl}/admin`, { params });
     }
 
     getProblemById<T = ProblemDto>(id: number): Observable<T> {

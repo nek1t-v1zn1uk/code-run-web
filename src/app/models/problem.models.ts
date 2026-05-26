@@ -32,6 +32,7 @@ export interface Problem {
     execution_memory_limit_kb: number;
     default_evaluation_type: string;
     default_script_checker_id: number | null;
+    is_public: boolean;
     created_at: string;
 }
 
@@ -60,6 +61,7 @@ export interface ProblemDto {
     default_evaluation_type?: EvaluationType | null;
     default_script_checker_id?: number | null;
     created_at: string;
+    is_public: boolean;
 }
 
 export interface CreateProblemRequest {
@@ -71,6 +73,7 @@ export interface CreateProblemRequest {
     execution_memory_limit_kb: number;
     default_evaluation_type: EvaluationType;
     default_script_checker_id?: number | null;
+    is_public?: boolean;
 }
 
 export interface UpdateProblemRequest {
@@ -82,6 +85,7 @@ export interface UpdateProblemRequest {
     execution_memory_limit_kb?: number | null;
     default_evaluation_type?: EvaluationType | null;
     default_script_checker_id?: number | null;
+    is_public?: boolean;
 }
 
 export interface ProblemPageResponse {

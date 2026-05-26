@@ -48,7 +48,7 @@ export class AdminProblemsList implements OnInit {
       ...(this.selectedTopic ? { topicName: this.selectedTopic } : {})
     };
 
-    this.problemService.getProblems(request).subscribe({
+    this.problemService.getAdminProblems(request).subscribe({
       next: (res) => {
         if (cursor) {
           this.problems.update(prev => [...prev, ...res.content as any[]]);

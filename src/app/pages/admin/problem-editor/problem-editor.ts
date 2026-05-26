@@ -66,7 +66,8 @@ export class ProblemEditor implements OnInit, AfterViewChecked {
     execution_time_limit_ms: [1000, [Validators.required, Validators.min(500)]],
     execution_memory_limit_kb: [65536, [Validators.required, Validators.min(512)]],
     default_evaluation_type: [EvaluationType.EXACT_MATCH, Validators.required],
-    default_script_checker_id: [null]
+    default_script_checker_id: [null],
+    is_public: [true]
   });
 
   previewHtml = signal<SafeHtml>('');
@@ -125,7 +126,8 @@ export class ProblemEditor implements OnInit, AfterViewChecked {
         execution_time_limit_ms: problem.execution_time_limit_ms,
         execution_memory_limit_kb: problem.execution_memory_limit_kb,
         default_evaluation_type: problem.default_evaluation_type,
-        default_script_checker_id: problem.default_script_checker_id
+        default_script_checker_id: problem.default_script_checker_id,
+        is_public: problem.is_public !== undefined ? problem.is_public : true
       });
       this.updatePreview();
 
