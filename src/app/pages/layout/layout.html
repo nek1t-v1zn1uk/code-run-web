@@ -11,38 +11,38 @@
       @if (activeContestId()) {
         <p class="nav-label">Contest Workspace</p>
         <a [routerLink]="['/contests', activeContestId(), 'overview']" routerLinkActive="active" class="nav-item">
-          <span class="icon">📊</span> Overview
+           <i-lucide name="layout-dashboard" class="icon"></i-lucide> Overview
         </a>
         <a [routerLink]="['/contests', activeContestId(), 'contesting']" routerLinkActive="active" class="nav-item">
-          <span class="icon">⚔️</span> Contesting
+           <i-lucide name="activity" class="icon"></i-lucide> Contesting
         </a>
         <a [routerLink]="['/contests', activeContestId(), 'scoreboard']" routerLinkActive="active" class="nav-item">
-          <span class="icon">🏆</span> Scoreboard
+           <i-lucide name="trophy" class="icon"></i-lucide> Scoreboard
         </a>
         <hr class="nav-divider">
       }
 
       <p class="nav-label">Main Menu</p>
       <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item">
-        <span class="icon">🏠</span> Home
+         <i-lucide name="home" class="icon"></i-lucide> Home
       </a>
       <a routerLink="/code-runner" routerLinkActive="active" class="nav-item">
-        <span class="icon">💻</span> Compiler
+         <i-lucide name="terminal" class="icon"></i-lucide> Compiler
       </a>
       <a routerLink="/problems" routerLinkActive="active" class="nav-item">
-        <span class="icon">📚</span> Problems
+         <i-lucide name="book-open" class="icon"></i-lucide> Problems
       </a>
       <a routerLink="/contests" routerLinkActive="active" class="nav-item">
-        <span class="icon">🏆</span> Contests
+         <i-lucide name="trophy" class="icon"></i-lucide> Contests
       </a>
 
       @if (isAdmin) {
         <p class="nav-label mt-4">Admin Panel</p>
         <a routerLink="/admin/problems" routerLinkActive="active" class="nav-item">
-          <span class="icon">⚙️</span> Manage Problems
+           <i-lucide name="settings" class="icon"></i-lucide> Manage Problems
         </a>
         <a routerLink="/admin/contests" routerLinkActive="active" class="nav-item">
-          <span class="icon">⚙️</span> Manage Contests
+           <i-lucide name="settings" class="icon"></i-lucide> Manage Contests
         </a>
       }
     </nav>

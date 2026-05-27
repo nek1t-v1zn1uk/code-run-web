@@ -1,7 +1,7 @@
 <div class="contests-container">
     <header class="header">
         <h1 class="title">
-            <span class="icon">🏆</span>
+            
             Contests
         </h1>
         <p class="subtitle">Compete with others and prove your skills</p>
@@ -15,7 +15,7 @@
         </div>
         } @else if (contests().length === 0) {
         <div class="empty-state">
-            <span class="empty-icon">📭</span>
+            
             <h2>No contests found</h2>
             <p>Check back later for upcoming contests</p>
         </div>
@@ -34,11 +34,11 @@
                     <p class="contest-overview">{{ contest.overview || 'No overview available' }}</p>
                     <div class="contest-meta">
                         <span class="meta-item">
-                            <span class="meta-icon">🕒</span>
+                            
                             Start: {{ formatDate(contest.start_time) }}
                         </span>
                         <span class="meta-item">
-                            <span class="meta-icon">🏁</span>
+                            
                             End: {{ formatDate(contest.end_time) }}
                         </span>
                     </div>

@@ -21,15 +21,15 @@
                     <div class="section overview-section">
                         <div class="meta-info">
                             <div class="meta-item">
-                                <span class="meta-icon">🕒</span>
+                                
                                 <strong>Start:</strong> {{ formatDate(contest()?.start_time) }}
                             </div>
                             <div class="meta-item">
-                                <span class="meta-icon">🏁</span>
+                                
                                 <strong>End:</strong> {{ formatDate(contest()?.end_time) }}
                             </div>
                             <div class="meta-item">
-                                <span class="meta-icon">👥</span>
+                                
                                 <strong>Participants:</strong> {{ members().length }}
                             </div>
                         </div>
@@ -42,7 +42,7 @@
                                     @if (isJoining()) {
                                         <span class="spinner-small"></span> Joining...
                                     } @else if (hasJoined()) {
-                                        <span class="icon">✅</span> Joined
+                                         Joined
                                     } @else {
                                         Join Contest
                                     }
@@ -53,7 +53,7 @@
 
                     <div class="section rules-section">
                         <h2 class="section-title">
-                            <span class="icon">📜</span> Rules
+                             Rules
                         </h2>
                         <div class="rules-content">
                             {{ contest()?.rules || 'No specific rules provided.' }}
@@ -66,7 +66,7 @@
         @if (activeTab() === 'contesting') {
             @if (getStatus() === 'Upcoming') {
                 <div class="countdown-container">
-                    <span class="countdown-icon">⏳</span>
+                    
                     <h2>Contest starts in</h2>
                     <div class="countdown-timer">{{ timeUntilStart() }}</div>
                 </div>
@@ -85,7 +85,7 @@
                                     </div>
                                     <div class="stat-value">
                                         @if (isFreezeTime()) {
-                                            <span class="frozen-text">❄️ FROZEN</span>
+                                            <span class="frozen-text"> FROZEN</span>
                                         } @else {
                                             {{ timeUntilFreeze() }}
                                         }
@@ -99,7 +99,7 @@
                 @if (progress()) {
                     <div class="personal-dashboard section mb-4">
                         <div class="dashboard-header">
-                            <span class="icon">📊</span>
+                            
                             <h3>Your Progress</h3>
                         </div>
                         <div class="progress-stats-grid">
@@ -121,26 +121,26 @@
 
                 <div class="section problems-section mt-4">
                     <h2 class="section-title">
-                        <span class="icon">📝</span> Problems
+                         Problems
                     </h2>
                     
                     @if (problems().length === 0) {
                     <div class="empty-state">
-                        <span class="empty-icon">📂</span>
+                        
                         <p>No problems available yet.</p>
                     </div>
                     } @else {
                     <div class="problems-list">
                         @for (cp of problems(); track cp.id) {
-                        <div class="problem-card" (click)="navigateToProblem(cp.problem_id)">
+                        <div class="problem-card" [class.solved]="progress() && progress()!.problem_stats[cp.problem_id]?.is_solved" (click)="navigateToProblem(cp.problem_id)">
                             @if (progress()) {
                                 <div class="problem-status-icon">
                                     @if (progress()!.problem_stats[cp.problem_id]?.is_solved) {
-                                        <span class="solved-icon" title="Solved">✅</span>
+                                        <i-lucide name="check-circle" class="solved-icon" title="Solved"></i-lucide>
                                     } @else if ((progress()!.problem_stats[cp.problem_id]?.unsuccessful_count || 0) > 0) {
-                                        <span class="failed-icon" title="Attempted">❌</span>
+                                        <i-lucide name="x-circle" class="failed-icon" title="Attempted"></i-lucide>
                                     } @else {
-                                        <span class="unattempted-icon"></span>
+                                        
                                     }
                                 </div>
                             }
@@ -180,7 +180,7 @@
         @if (activeTab() === 'scoreboard') {
             <div class="scoreboard-section section">
                 <div class="dashboard-header">
-                    <span class="icon">🏆</span>
+                    
                     <h2>Live Scoreboard</h2>
                 </div>
                 
@@ -237,7 +237,7 @@
                     </div>
                 } @else {
                     <div class="empty-state">
-                        <span class="empty-icon">👥</span>
+                        
                         <p>No scoreboard data available yet.</p>
                     </div>
                 }

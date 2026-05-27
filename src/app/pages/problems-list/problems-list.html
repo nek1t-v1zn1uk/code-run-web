@@ -1,7 +1,7 @@
 <div class="problems-container">
     <header class="header">
         <h1 class="title">
-            <span class="icon">📚</span>
+            
             Problems
         </h1>
         <p class="subtitle">Browse and solve competitive programming problems</p>
@@ -12,7 +12,7 @@
         <div class="filters-group">
             <div class="filter-item">
                 <label class="filter-label">
-                    <span class="label-icon">🏷️</span>
+                    
                     Topic
                 </label>
                 <select class="filter-select" [value]="selectedTopic()" (change)="onTopicChange($event)">
@@ -25,7 +25,7 @@
 
             <div class="filter-item">
                 <label class="filter-label">
-                    <span class="label-icon">⚡</span>
+                    
                     Difficulty
                 </label>
                 <select class="filter-select" [value]="selectedDifficulty()" (change)="onDifficultyChange($event)">
@@ -49,42 +49,21 @@
         </div>
         } @else if (problems().length === 0) {
         <div class="empty-state">
-            <span class="empty-icon">📭</span>
+            
             <h2>No problems found</h2>
             <p>Try adjusting your filters or check back later</p>
         </div>
         } @else {
-        <div class="problems-grid">
+        <div class="problems-list">
             @for (problem of problems(); track problem.id) {
-            <div class="problem-card" (click)="navigateToProblem(problem.id)">
-                <div class="card-header">
+            <div class="problem-row" (click)="navigateToProblem(problem.id)">
+                <div class="problem-info">
                     <h3 class="problem-title">{{ problem.title }}</h3>
+                    <span class="topic-tag">{{ problem.topic?.name || 'Uncategorized' }}</span>
+                </div>
+                <div class="problem-actions">
                     <span class="difficulty-badge" [class]="getDifficultyClass(problem.difficulty)">
                         {{ getDifficultyLabel(problem.difficulty) }}
-                    </span>
-                </div>
-
-                <div class="card-body">
-                    <div class="problem-meta">
-                        <span class="meta-item">
-                            <span class="meta-icon">🏷️</span>
-                            {{ problem.topic?.name || 'N/A' }}
-                        </span>
-                        <span class="meta-item">
-                            <span class="meta-icon">⏱️</span>
-                            {{ problem.execution_time_limit_ms }}ms
-                        </span>
-                        <span class="meta-item">
-                            <span class="meta-icon">💾</span>
-                            {{ problem.execution_memory_limit_kb / 1024 }}MB
-                        </span>
-                    </div>
-                </div>
-
-                <div class="card-footer">
-                    <span class="created-date">
-                        <span class="date-icon">📅</span>
-                        {{ formatDate(problem.created_at) }}
                     </span>
                     <span class="view-arrow">→</span>
                 </div>

@@ -10,6 +10,7 @@ import { AuthService } from '../../services/auth.service';
 import { marked } from 'marked';
 import markedKatex from 'marked-katex-extension';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { LucideAngularModule } from 'lucide-angular';
 
 declare const monaco: any;
 declare const require: any;
@@ -21,7 +22,7 @@ import { ProblemComments } from './problem-comments/problem-comments';
 @Component({
     selector: 'app-problem-detail',
     standalone: true,
-    imports: [CommonModule, FormsModule, ProblemComments],
+    imports: [CommonModule, FormsModule, ProblemComments, LucideAngularModule],
     templateUrl: './problem-detail.html',
     styleUrl: './problem-detail.css'
 })

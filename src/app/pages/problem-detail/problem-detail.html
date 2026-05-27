@@ -6,7 +6,7 @@
     </div>
     } @else if (error()) {
     <div class="error-container">
-        <span class="error-icon">❌</span>
+        
         <h2>{{ error() }}</h2>
         <p>The problem you're looking for doesn't exist or has been removed.</p>
         <button class="btn btn-primary" (click)="goBack()">
@@ -43,11 +43,11 @@
                     </div>
                     <div class="problem-metadata">
                         <span class="meta-item">
-                            <span class="meta-icon">🏷️</span>
+                            
                             Topic: <strong>{{ problem()!.topic?.name || 'None' }}</strong>
                         </span>
                         <span class="meta-item">
-                            <span class="meta-icon">📅</span>
+                            
                             Created: <strong>{{ formatDate(problem()!.created_at) }}</strong>
                         </span>
                     </div>
@@ -56,14 +56,14 @@
                 <div class="section constraints-section">
                     <div class="constraints-grid">
                         <div class="constraint-item">
-                            <div class="constraint-icon">⏱️</div>
+                            <i-lucide name="clock" class="constraint-icon"></i-lucide>
                             <div class="constraint-details">
                                 <div class="constraint-label">Time Limit</div>
                                 <div class="constraint-value">{{ problem()!.execution_time_limit_ms }} ms</div>
                             </div>
                         </div>
                         <div class="constraint-item">
-                            <div class="constraint-icon">💾</div>
+                            <i-lucide name="hard-drive" class="constraint-icon"></i-lucide>
                             <div class="constraint-details">
                                 <div class="constraint-label">Memory Limit</div>
                                 <div class="constraint-value">{{ problem()!.execution_memory_limit_kb / 1024 | number:'1.0-2' }} MB</div>
@@ -122,7 +122,7 @@
                 @if (!isSolvingStarted()) {
                 <div class="action-section">
                     <button class="btn btn-primary btn-large" (click)="startSolving()">
-                        <span class="btn-icon">💻</span>
+                        
                         Start Solving
                     </button>
                 </div>
@@ -156,10 +156,10 @@
                                     <span class="detail-pill">Failed on Test #{{ sol.test_case_reached }}</span>
                                 }
                                 @if (sol.status === 'TIME_LIMIT_EXCEEDED' && sol.execution_time_ms) {
-                                    <span class="detail-pill time-pill">⏱️ {{ sol.execution_time_ms }} ms</span>
+                                    <span class="detail-pill time-pill"> {{ sol.execution_time_ms }} ms</span>
                                 }
                                 @if (sol.status === 'MEMORY_LIMIT_EXCEEDED' && sol.execution_memory_kb) {
-                                    <span class="detail-pill memory-pill">💾 {{ sol.execution_memory_kb / 1024 | number:'1.0-2' }} MB</span>
+                                    <span class="detail-pill memory-pill"> {{ sol.execution_memory_kb / 1024 | number:'1.0-2' }} MB</span>
                                 }
                             </div>
                         </div>
@@ -168,7 +168,7 @@
                 </div>
                 } @else {
                     <div class="empty-state">
-                        <span class="empty-icon">📝</span>
+                        
                         <p>You haven't submitted any solutions for this problem yet.</p>
                     </div>
                 }
@@ -193,7 +193,7 @@
                         <span class="spinner-small"></span>
                         Evaluating...
                     } @else {
-                        <span class="btn-icon">▶</span>
+                        
                         Submit
                     }
                 </button>

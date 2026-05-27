@@ -1,7 +1,7 @@
 <div class="code-runner-container">
     <header class="header">
         <h1 class="title">
-            <span class="icon">⚡</span>
+            
             Code Runner
         </h1>
         <p class="subtitle">Write, test, and run your code with syntax highlighting and autocompletion</p>
@@ -10,7 +10,7 @@
     <div class="controls">
         <div class="control-group">
             <label for="language-select" class="control-label">
-                <span class="label-icon">🔤</span>
+                
                 Language
             </label>
             <select id="language-select" class="language-select" [value]="selectedLanguage()"
@@ -23,15 +23,15 @@
 
         <div class="button-group">
             <button class="btn btn-secondary" (click)="clearCode()" [disabled]="isLoading()">
-                <span class="btn-icon">🔄</span>
+                
                 Reset Code
             </button>
             <button class="btn btn-primary" (click)="runCode()" [disabled]="isLoading()">
                 @if (isLoading()) {
-                <span class="btn-icon spinner">⏳</span>
+                
                 Running...
                 } @else {
-                <span class="btn-icon">▶</span>
+                
                 Run Code
                 }
             </button>
@@ -61,7 +61,7 @@
             <div class="input-wrapper">
                 <div class="input-header">
                     <span class="input-title">
-                        <span class="label-icon">📥</span>
+                        
                         Input Data
                     </span>
                     <button class="btn-clear" (click)="clearInput()" [disabled]="isLoading()">Clear</button>
@@ -77,7 +77,7 @@
             <div class="output-wrapper">
                 <div class="output-header">
                     <span class="output-title">
-                        <span class="label-icon">📤</span>
+                        
                         Output
                     </span>
                     <button class="btn-clear" (click)="clearOutput()" [disabled]="isLoading()">Clear</button>
@@ -93,18 +93,18 @@
                     @if (executionStats()) {
                     <div class="execution-stats">
                         <span class="stat">
-                            <span class="stat-icon">⏱️</span>
+                            
                             Time: {{ executionStats()!.time.toFixed(3) }}s
                         </span>
                         <span class="stat">
-                            <span class="stat-icon">💾</span>
+                            
                             Memory: {{ (executionStats()!.memory / 1024).toFixed(2) }} MB
                         </span>
                     </div>
                     }
                     } @else {
                     <div class="output-placeholder">
-                        <span class="placeholder-icon">💻</span>
+                        
                         <p>Run your code to see the output here</p>
                     </div>
                     }

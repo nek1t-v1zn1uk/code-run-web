@@ -8,6 +8,7 @@ import { ProblemDto } from '../../models/problem.models';
 import { forkJoin, map, Observable, of, switchMap, catchError, Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { ScoreboardWebSocketService } from '../../services/scoreboard-ws.service';
+import { LucideAngularModule } from 'lucide-angular';
 
 interface ContestProblemWithDetails extends ContestProblemDto {
     problemDetails?: ProblemDto;
@@ -16,7 +17,7 @@ interface ContestProblemWithDetails extends ContestProblemDto {
 @Component({
     selector: 'app-contest-detail',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, LucideAngularModule],
     templateUrl: './contest-detail.html',
     styleUrl: './contest-detail.css'
 })

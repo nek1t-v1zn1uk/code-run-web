@@ -229,6 +229,16 @@
     transform: translateX(4px);
 }
 
+.problem-card.solved {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.problem-card.solved:hover {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.5);
+}
+
 .problem-ordinal {
     font-size: 1.5rem;
     font-weight: 700;
@@ -498,7 +508,20 @@
     left: 1rem;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+.solved-icon {
+    color: #10b981;
+    width: 20px;
+    height: 20px;
+}
+
+.failed-icon {
+    color: #ef4444;
+    width: 20px;
+    height: 20px;
 }
 
 .penalty-badge {
