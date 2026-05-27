@@ -1,0 +1,74 @@
+<div class="comments-section">
+  <h3>Discussions</h3>
+
+  <div *ngIf="authService.isLoggedIn()" class="add-comment">
+    <textarea [(ngModel)]="newCommentText" placeholder="Write a comment..." rows="3"></textarea>
+    <div class="comment-actions">
+      <select [(ngModel)]="selectedSolutionId" class="solution-select">
+        <option [ngValue]="null">-- Pin a solution (optional) --</option>
+        <option *ngFor="let sol of solutions; let i = index" [ngValue]="sol.id">
+          Solution #{{ solutions.length - i }} ({{ sol.status.replace('_', ' ') }})
+        </option>
+      </select>
+      <button class="btn btn-primary" (click)="addComment()">Post Comment</button>
+    </div>
+  </div>
+
+  <div *ngIf="!authService.isLoggedIn()" class="auth-warning">
+    <a routerLink="/sign-in">Sign in</a> to leave a comment.
+  </div>
+
+  <div class="comments-list">
+    <!-- Recursive template for comments -->
+    <ng-template #commentTemplate let-commentList="commentList" let-isReply="isReply">
+      <div class="comment-thread" *ngFor="let comment of commentList" [class.is-reply]="isReply">
+        <div class="comment-card">
+          <div class="comment-header">
+            <div class="author-info">
+              <img *ngIf="comment.user_photo_url" [src]="comment.user_photo_url" alt="Avatar" class="author-avatar" />
+              <div *ngIf="!comment.user_photo_url" class="author-avatar-placeholder">
+                {{ comment.user_first_name?.charAt(0) | uppercase }}
+              </div>
+              <span class="author-name">{{ comment.user_first_name }} {{ comment.user_last_name }}</span>
+            </div>
+            <span class="comment-date">{{ comment.created_at | date:'short' }}</span>
+          </div>
+          <div class="comment-body">
+            {{ comment.text }}
+          </div>
+          <div class="comment-pinned" *ngIf="comment.pinned_solution_id">
+            <span class="badge badge-info clickable" (click)="openSolution(comment.pinned_solution_id)" title="Click to view solution">Pinned {{ getSolutionDisplayInfo(comment.pinned_solution_id) }}</span>
+          </div>
+          <div class="comment-footer" *ngIf="authService.isLoggedIn() && !isReply">
+            <button class="btn btn-sm btn-outline" (click)="setReplyingTo(comment.id)">Reply</button>
+          </div>
+        </div>
+
+        <!-- Reply Editor -->
+        <div class="reply-editor" *ngIf="replyingTo === comment.id">
+          <textarea [(ngModel)]="replyText" placeholder="Write a reply..." rows="2"></textarea>
+          <div class="comment-actions">
+            <select [(ngModel)]="replySelectedSolutionId" class="solution-select">
+              <option [ngValue]="null">-- Pin a solution (optional) --</option>
+              <option *ngFor="let sol of solutions; let i = index" [ngValue]="sol.id">
+                Solution #{{ solutions.length - i }} ({{ sol.status.replace('_', ' ') }})
+              </option>
+            </select>
+            <button class="btn btn-sm btn-primary" (click)="addReply(comment.id)">Post Reply</button>
+            <button class="btn btn-sm btn-secondary" (click)="cancelReply()">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Replies (recursion) -->
+        <div class="replies" *ngIf="comment.replies && comment.replies.length > 0">
+          <ng-container *ngTemplateOutlet="commentTemplate; context: { commentList: comment.replies, isReply: true }"></ng-container>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-container *ngTemplateOutlet="commentTemplate; context: { commentList: comments(), isReply: false }"></ng-container>
+    <div *ngIf="comments().length === 0" class="no-comments">
+      No comments yet. Be the first to start a discussion!
+    </div>
+  </div>
+</div>

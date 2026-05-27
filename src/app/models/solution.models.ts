@@ -13,6 +13,8 @@ export interface SolutionDto {
   id: number;
   problem_id: number;
   user_id: number;
+  user_first_name?: string | null;
+  user_last_name?: string | null;
   code: string;
   language: any; // Can be string or AvailableLanguage object depending on mapping
   status: SolutionStatus;

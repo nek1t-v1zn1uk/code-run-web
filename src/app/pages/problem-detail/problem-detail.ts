@@ -16,10 +16,12 @@ declare const require: any;
 
 marked.use(markedKatex({ throwOnError: false, output: 'html' }));
 
+import { ProblemComments } from './problem-comments/problem-comments';
+
 @Component({
     selector: 'app-problem-detail',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, ProblemComments],
     templateUrl: './problem-detail.html',
     styleUrl: './problem-detail.css'
 })
@@ -47,7 +49,7 @@ export class ProblemDetail implements OnInit, AfterViewChecked, OnDestroy {
     pollInterval: any;
     isSolvingStarted = signal(false);
     solutions = signal<SolutionDto[]>([]);
-    activeLeftTab = signal<'description' | 'submissions'>('description');
+    activeLeftTab = signal<'description' | 'submissions' | 'discussions'>('description');
     viewingSolution = signal<SolutionDto | null>(null);
 
     copiedState: { [key: string]: boolean } = {};
@@ -214,10 +216,14 @@ export class ProblemDetail implements OnInit, AfterViewChecked, OnDestroy {
         }
     }
 
-    getSubmissionIndex(sol: SolutionDto): number {
+    getModalTitle(sol: SolutionDto): string {
         const index = this.solutions().findIndex(s => s.id === sol.id);
-        if (index === -1) return 0;
-        return this.solutions().length - index;
+        if (index === -1) {
+            const firstName = sol.user_first_name || 'User';
+            const lastName = sol.user_last_name || '';
+            return `Solution by ${firstName} ${lastName}`.trim();
+        }
+        return `Solution #${this.solutions().length - index}`;
     }
 
     submitSolution(): void {

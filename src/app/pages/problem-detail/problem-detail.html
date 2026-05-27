@@ -25,7 +25,10 @@
                 </button>
                 <div class="left-pane-tabs">
                     <button class="tab-btn" [class.active]="activeLeftTab() === 'description'" (click)="activeLeftTab.set('description')">Description</button>
-                    <button class="tab-btn" [class.active]="activeLeftTab() === 'submissions'" (click)="activeLeftTab.set('submissions')">Submissions <span class="tab-badge" *ngIf="solutions().length">{{ solutions().length }}</span></button>
+                    <button class="tab-btn" [class.active]="activeLeftTab() === 'submissions'" (click)="activeLeftTab.set('submissions')">Solutions <span class="tab-badge" *ngIf="solutions().length">{{ solutions().length }}</span></button>
+                    @if (!contestId) {
+                        <button class="tab-btn" [class.active]="activeLeftTab() === 'discussions'" (click)="activeLeftTab.set('discussions')">Discussions</button>
+                    }
                 </div>
             </div>
             
@@ -124,6 +127,13 @@
                     </button>
                 </div>
                 }
+
+            </div>
+            }
+
+            @if (activeLeftTab() === 'discussions' && !contestId) {
+            <div class="problem-content discussions-content">
+                <app-problem-comments [problemId]="problem()!.id" [solutions]="solutions()" (solutionClick)="viewSolution($event)"></app-problem-comments>
             </div>
             }
 
@@ -231,7 +241,7 @@
 <div class="modal-overlay" (click)="closeSolutionModal()">
     <div class="modal-container premium-glass" (click)="$event.stopPropagation()">
         <div class="modal-header">
-            <h3>Submission #{{ getSubmissionIndex(viewingSolution()!) }}</h3>
+            <h3>{{ getModalTitle(viewingSolution()!) }}</h3>
             <button class="btn-close" (click)="closeSolutionModal()">×</button>
         </div>
         <div class="modal-meta">
