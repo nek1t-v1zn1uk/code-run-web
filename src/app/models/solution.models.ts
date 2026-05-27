@@ -1,6 +1,8 @@
 export type SolutionStatus =
   | 'IN_QUEUE'
-  | 'RUNNING'
+  | 'COMPILING'
+  | 'COMPILATION_ERROR'
+  | 'EXECUTION'
   | 'SUCCESS'
   | 'RUNTIME_ERROR'
   | 'TEST_FAILED'

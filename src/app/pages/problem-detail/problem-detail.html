@@ -210,9 +210,11 @@
                         <span class="status-badge">{{ solutionResult()!.status.replace('_', ' ') }}</span>
                     </div>
                     <div class="result-details">
-                        @if (solutionResult()!.test_case_reached !== null && solutionResult()!.test_case_reached !== undefined) {
+                        @if (solutionResult()!.test_case_reached !== null && solutionResult()!.test_case_reached !== undefined && solutionResult()!.status !== 'SUCCESS' && solutionResult()!.status !== 'IN_QUEUE' && solutionResult()!.status !== 'COMPILING') {
                             <div class="detail-item">
-                                <span class="detail-label">Failed on Test:</span>
+                                <span class="detail-label">
+                                    {{ solutionResult()!.status === 'EXECUTION' ? 'Running Test:' : 'Failed on Test:' }}
+                                </span>
                                 <span class="detail-value">#{{ solutionResult()!.test_case_reached }}</span>
                             </div>
                         }

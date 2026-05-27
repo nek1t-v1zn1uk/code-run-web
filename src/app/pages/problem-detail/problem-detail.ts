@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ProblemService } from '../../services/problem.service';
 import { ProblemDto } from '../../models/problem.models';
 import { SolutionService } from '../../services/solution.service';
+import { SolutionWebSocketService } from '../../services/solution-ws.service';
 import { SolutionDto, SendSolutionRequest } from '../../models/solution.models';
 import { AuthService } from '../../services/auth.service';
 import { marked } from 'marked';
@@ -58,6 +59,7 @@ export class ProblemDetail implements OnInit, AfterViewChecked, OnDestroy {
     constructor(
         private problemService: ProblemService,
         private solutionService: SolutionService,
+        private solutionWsService: SolutionWebSocketService,
         private authService: AuthService,
         private route: ActivatedRoute,
         private router: Router,
@@ -73,6 +75,18 @@ export class ProblemDetail implements OnInit, AfterViewChecked, OnDestroy {
             }
             if (id) {
                 this.loadProblem(id);
+            }
+        });
+        
+        this.solutionWsService.solution$.subscribe(res => {
+            if (res) {
+                this.solutionResult.set(res);
+                if (res.status !== 'IN_QUEUE' && res.status !== 'EXECUTION' && res.status !== 'COMPILING') {
+                    this.solutionWsService.unsubscribe();
+                    this.isSubmitting.set(false);
+                    if (this.pollInterval) clearInterval(this.pollInterval);
+                    this.loadSolutions();
+                }
             }
         });
     }
@@ -109,6 +123,7 @@ export class ProblemDetail implements OnInit, AfterViewChecked, OnDestroy {
         if (this.editor) {
             this.editor.dispose();
         }
+        this.solutionWsService.unsubscribe();
         if (this.pollInterval) {
             clearInterval(this.pollInterval);
         }
@@ -251,7 +266,21 @@ export class ProblemDetail implements OnInit, AfterViewChecked, OnDestroy {
         this.solutionService.sendSolution(p.id, req).subscribe({
             next: (res) => {
                 this.solutionResult.set(res);
-                this.pollResult(res.id);
+                this.solutionWsService.subscribeToSolution(res.id);
+                
+                // Fallback polling just in case WebSocket misses the extremely fast completion event
+                if (this.pollInterval) clearInterval(this.pollInterval);
+                this.pollInterval = setInterval(() => {
+                    this.solutionService.getSolution(res.id).subscribe(latest => {
+                        this.solutionResult.set(latest);
+                        if (latest.status !== 'IN_QUEUE' && latest.status !== 'EXECUTION' && latest.status !== 'COMPILING') {
+                            clearInterval(this.pollInterval);
+                            this.solutionWsService.unsubscribe();
+                            this.isSubmitting.set(false);
+                            this.loadSolutions();
+                        }
+                    });
+                }, 2000);
             },
             error: (err) => {
                 console.error('Submit error:', err);
@@ -259,29 +288,6 @@ export class ProblemDetail implements OnInit, AfterViewChecked, OnDestroy {
                 alert('Error submitting solution');
             }
         });
-    }
-
-    private pollResult(solutionId: number): void {
-        if (this.pollInterval) {
-            clearInterval(this.pollInterval);
-        }
-        this.pollInterval = setInterval(() => {
-            this.solutionService.getSolution(solutionId).subscribe({
-                next: (res) => {
-                    this.solutionResult.set(res);
-                    if (res.status !== 'IN_QUEUE' && res.status !== 'RUNNING') {
-                        clearInterval(this.pollInterval);
-                        this.isSubmitting.set(false);
-                        this.loadSolutions();
-                    }
-                },
-                error: (err) => {
-                    console.error('Poll error:', err);
-                    clearInterval(this.pollInterval);
-                    this.isSubmitting.set(false);
-                }
-            });
-        }, 2000);
     }
 
     protected goBack(): void {

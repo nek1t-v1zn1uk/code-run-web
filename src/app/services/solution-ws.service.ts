@@ -1,19 +1,19 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { RxStomp } from '@stomp/rx-stomp';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { ScoreboardDto } from '../models/contest.models';
+import { SolutionDto } from '../models/solution.models';
 import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ScoreboardWebSocketService implements OnDestroy {
+export class SolutionWebSocketService implements OnDestroy {
   private rxStomp: RxStomp;
-  private currentContestId: number | null = null;
-  private scoreboardSubject = new BehaviorSubject<ScoreboardDto | null>(null);
+  private currentSolutionId: number | null = null;
+  private solutionSubject = new BehaviorSubject<SolutionDto | null>(null);
   private subscription: Subscription | null = null;
 
-  public scoreboard$ = this.scoreboardSubject.asObservable();
+  public solution$ = this.solutionSubject.asObservable();
 
   constructor() {
     this.rxStomp = new RxStomp();
@@ -28,25 +28,21 @@ export class ScoreboardWebSocketService implements OnDestroy {
     this.rxStomp.activate();
   }
 
-  public subscribeToContestScoreboard(contestId: number): void {
-    if (this.currentContestId === contestId) {
+  public subscribeToSolution(solutionId: number): void {
+    if (this.currentSolutionId === solutionId) {
       return;
     }
     this.unsubscribe();
-    this.currentContestId = contestId;
+    this.currentSolutionId = solutionId;
     
-    this.subscription = this.rxStomp.watch(`/topic/contests/${contestId}/scoreboard`).subscribe((message) => {
+    this.subscription = this.rxStomp.watch(`/topic/solutions/${solutionId}`).subscribe((message) => {
       try {
-        const scoreboard = JSON.parse(message.body) as ScoreboardDto;
-        this.scoreboardSubject.next(scoreboard);
+        const solution = JSON.parse(message.body) as SolutionDto;
+        this.solutionSubject.next(solution);
       } catch (e) {
-        console.error('Failed to parse scoreboard update', e);
+        console.error('Failed to parse solution update', e);
       }
     });
-  }
-
-  public setInitialScoreboard(scoreboard: ScoreboardDto): void {
-    this.scoreboardSubject.next(scoreboard);
   }
 
   public unsubscribe(): void {
@@ -54,7 +50,7 @@ export class ScoreboardWebSocketService implements OnDestroy {
       this.subscription.unsubscribe();
       this.subscription = null;
     }
-    this.currentContestId = null;
+    this.currentSolutionId = null;
   }
 
   ngOnDestroy(): void {
