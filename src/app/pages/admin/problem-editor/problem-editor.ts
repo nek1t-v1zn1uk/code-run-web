@@ -131,23 +131,36 @@ export class ProblemEditor implements OnInit, AfterViewChecked {
       });
       this.updatePreview();
 
-      // Load the default script checker if one is set
-      if (problem.default_script_checker_id) {
-        this.checkerService.getScriptChecker(problem.default_script_checker_id).subscribe(checker => {
-          this.checkers = [{
-            id: checker.id,
-            name: checker.name,
-            language: typeof checker.language === 'string' ? checker.language : (checker.language as any)?.language ?? 'python',
-            code: checker.code
-          }];
-          // Ensure the dropdown reflects the loaded checker
-          this.problemForm.patchValue({ default_script_checker_id: checker.id });
-        });
-      }
-    });
+      this.testService.getProblemTests(this.problemId!).subscribe(tests => {
+        this.tests = tests.sort((a, b) => a.ordinal - b.ordinal);
 
-    this.testService.getProblemTests(this.problemId).subscribe(tests => {
-      this.tests = tests.sort((a, b) => a.ordinal - b.ordinal);
+        const checkerIds = new Set<number>();
+        if (problem.default_script_checker_id) {
+          checkerIds.add(problem.default_script_checker_id);
+        }
+        for (const t of tests) {
+          if (t.override_script_checker_id) {
+            checkerIds.add(t.override_script_checker_id);
+          }
+        }
+
+        if (checkerIds.size > 0) {
+          const obs = Array.from(checkerIds).map(id => this.checkerService.getScriptChecker(id));
+          forkJoin(obs).subscribe(checkersData => {
+            this.checkers = checkersData.map(checker => ({
+              id: checker.id,
+              name: checker.name,
+              language: typeof checker.language === 'string' ? checker.language : (checker.language as any)?.language ?? 'python',
+              code: checker.code
+            }));
+            
+            // Ensure the dropdown reflects the loaded checker
+            if (problem.default_script_checker_id) {
+              this.problemForm.patchValue({ default_script_checker_id: problem.default_script_checker_id });
+            }
+          });
+        }
+      });
     });
   }
 

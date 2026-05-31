@@ -121,7 +121,11 @@ export class ContestDetail implements OnInit {
                 if (data.scoreboard) {
                     this.scoreboardWsService.setInitialScoreboard(data.scoreboard);
                 }
-                this.scoreboardWsService.subscribeToContestScoreboard(id);
+                const now = new Date();
+                const end = new Date(data.contest.end_time);
+                if (now <= end) {
+                    this.scoreboardWsService.subscribeToContestScoreboard(id);
+                }
                 this.isLoading.set(false);
                 this.startTimer();
             },

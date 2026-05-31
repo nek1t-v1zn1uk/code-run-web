@@ -152,7 +152,7 @@
                                 <span class="sent-time">{{ formatDate(sol.sent_at) }}</span>
                             </div>
                             <div class="item-details">
-                                @if (sol.test_case_reached) {
+                                @if (sol.test_case_reached && sol.status !== 'SUCCESS') {
                                     <span class="detail-pill">Failed on Test #{{ sol.test_case_reached }}</span>
                                 }
                                 @if (sol.status === 'TIME_LIMIT_EXCEEDED' && sol.execution_time_ms) {

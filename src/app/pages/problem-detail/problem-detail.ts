@@ -183,6 +183,7 @@ export class ProblemDetail implements OnInit, AfterViewChecked, OnDestroy {
     private loadProblem(id: number): void {
         this.isLoading.set(true);
         this.error.set(null);
+        this.solutionResult.set(null);
 
         this.problemService.getProblemById<ProblemDto>(id).subscribe({
             next: (problem) => {
@@ -215,7 +216,12 @@ export class ProblemDetail implements OnInit, AfterViewChecked, OnDestroy {
         const p = this.problem();
         if (!p) return;
         this.solutionService.getSolutionsForProblem(p.id).subscribe({
-            next: (res) => this.solutions.set(res),
+            next: (res) => {
+                this.solutions.set(res);
+                if (res.length > 0 && !this.isSubmitting()) {
+                    this.solutionResult.set(res[0]);
+                }
+            },
             error: (err) => console.error('Error loading solutions:', err)
         });
     }

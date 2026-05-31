@@ -124,7 +124,7 @@
                 <label>Topic</label>
                 <select formControlName="topic" class="glass-select">
                   <option [ngValue]="null">General / No Topic</option>
-                  @for (t of topics; track t.id) {
+                  @for (t of topics; track t.name) {
                     <option [value]="t.name">{{ t.name }}</option>
                   }
                 </select>

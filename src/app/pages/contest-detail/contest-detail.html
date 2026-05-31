@@ -180,8 +180,7 @@
         @if (activeTab() === 'scoreboard') {
             <div class="scoreboard-section section">
                 <div class="dashboard-header">
-                    
-                    <h2>Live Scoreboard</h2>
+                    <h2>{{ getStatus() === 'Ended' ? 'Final Scoreboard' : 'Live Scoreboard' }}</h2>
                 </div>
                 
                 @if (scoreboard() && scoreboard()!.rows.length > 0) {
@@ -201,7 +200,17 @@
                             <tbody>
                                 @for (row of scoreboard()!.rows; track row.user_id; let i = $index) {
                                     <tr>
-                                        <td class="col-rank">{{ i + 1 }}</td>
+                                        <td class="col-rank">
+                                            @if (row.place === 1) {
+                                                <span class="rank-badge rank-1" style="color: gold; font-weight: bold;">🥇 {{ row.place }}</span>
+                                            } @else if (row.place === 2) {
+                                                <span class="rank-badge rank-2" style="color: silver; font-weight: bold;">🥈 {{ row.place }}</span>
+                                            } @else if (row.place === 3) {
+                                                <span class="rank-badge rank-3" style="color: #cd7f32; font-weight: bold;">🥉 {{ row.place }}</span>
+                                            } @else {
+                                                <span class="rank-badge">{{ row.place }}</span>
+                                            }
+                                        </td>
                                         <td class="col-user">{{ row.username }}</td>
                                         <td class="col-solved">{{ row.solved_count }}</td>
                                         <td class="col-penalty">{{ row.total_score }}</td>

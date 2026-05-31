@@ -23,7 +23,6 @@ export interface Topic {
 }
 
 export interface ProblemTopic {
-    id: number;
     name: string;
 }
 

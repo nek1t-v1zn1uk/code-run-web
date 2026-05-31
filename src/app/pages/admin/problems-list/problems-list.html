@@ -29,7 +29,7 @@
       <label>Topic</label>
       <select [(ngModel)]="selectedTopic" (change)="onSearchChange()" class="glass-select">
         <option [ngValue]="null">All Topics</option>
-        @for (t of topics(); track t.id) {
+        @for (t of topics(); track t.name) {
           <option [value]="t.name">{{ t.name }}</option>
         }
       </select>

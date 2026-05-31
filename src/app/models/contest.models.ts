@@ -48,6 +48,7 @@ export interface ScoreboardRowDto {
     solved_count: number;
     total_score: number;
     problem_stats: { [key: number]: ScoreboardProblemStatDto };
+    place: number;
 }
 
 export interface ScoreboardProblemStatDto {
