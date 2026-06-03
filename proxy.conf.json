@@ -11,5 +11,11 @@
         "secure": false,
         "changeOrigin": true,
         "logLevel": "debug"
+    },
+    "/uploads": {
+        "target": "http://localhost:1488",
+        "secure": false,
+        "changeOrigin": true,
+        "logLevel": "debug"
     }
 }
