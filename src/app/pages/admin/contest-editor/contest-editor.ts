@@ -9,6 +9,8 @@ import { ProblemService } from '../../../services/problem.service';
 import { CreateContestRequest, ContestProblemDto } from '../../../models/contest.models';
 import { ProblemDto } from '../../../models/problem.models';
 
+import { ProblemPickerModal } from '../../../components/problem-picker-modal/problem-picker-modal';
+
 // Local interface to hold a problem row with its resolved name
 export interface ContestProblemRow {
   problem_id: number;
@@ -19,7 +21,7 @@ export interface ContestProblemRow {
 @Component({
   selector: 'app-admin-contest-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, ProblemPickerModal],
   templateUrl: './contest-editor.html',
   styleUrl: './contest-editor.css'
 })
@@ -48,31 +50,19 @@ export class AdminContestEditor implements OnInit {
   isSaving = signal(false);
   isSavingProblems = signal(false);
 
-  // All problems from the backend for the dropdown
-  allProblems = signal<ProblemDto[]>([]);
-
   // The ordered list of problems in this contest (with names)
   problemRows = signal<ContestProblemRow[]>([]);
 
-  // The currently selected problem id in the "add" dropdown
-  selectedProblemId = '';
+  // Modal visibility
+  isPickerModalVisible = false;
 
   ngOnInit(): void {
     const id = this.route.snapshot.params['id'];
     if (id && id !== 'new') {
       this.isEditMode = true;
       this.contestId = Number(id);
-      this.loadAllProblems();
       this.loadData();
     }
-  }
-
-  /** Fetch all available problems for the dropdown */
-  private loadAllProblems(): void {
-    this.problemService.getAdminProblems({ limit: 200 }).subscribe({
-      next: (res) => this.allProblems.set(res.content),
-      error: (err) => console.error('Failed to load problems', err)
-    });
   }
 
   loadData(): void {
@@ -213,20 +203,21 @@ export class AdminContestEditor implements OnInit {
 
   // ── Problem list management ──
 
-  /** Add the selected problem to the bottom of the list */
-  addProblem(): void {
-    if (!this.selectedProblemId) return;
+  openPickerModal(): void {
+    this.isPickerModalVisible = true;
+  }
 
-    const probId = Number(this.selectedProblemId);
+  closePickerModal(): void {
+    this.isPickerModalVisible = false;
+  }
+
+  onProblemSelected(prob: ProblemDto): void {
     const current = this.problemRows();
 
-    if (current.some(r => r.problem_id === probId)) {
+    if (current.some(r => r.problem_id === prob.id)) {
       alert('This problem is already in the contest.');
       return;
     }
-
-    const prob = this.allProblems().find(p => p.id === probId);
-    if (!prob) return;
 
     const newRow: ContestProblemRow = {
       problem_id: prob.id,
@@ -235,23 +226,7 @@ export class AdminContestEditor implements OnInit {
     };
 
     this.problemRows.set([...current, newRow]);
-    this.selectedProblemId = '';
-  }
-
-  /** Swap a problem in-place via dropdown */
-  changeProblem(index: number, newProblemId: number): void {
-    const current = [...this.problemRows()];
-
-    if (current.some((r, i) => i !== index && r.problem_id === newProblemId)) {
-      alert('This problem is already in the contest.');
-      return;
-    }
-
-    const prob = this.allProblems().find(p => p.id === newProblemId);
-    if (!prob) return;
-
-    current[index] = { ...current[index], problem_id: prob.id, title: prob.title };
-    this.problemRows.set(current);
+    this.closePickerModal();
   }
 
   moveProblemUp(index: number): void {
@@ -296,12 +271,6 @@ export class AdminContestEditor implements OnInit {
         this.isSavingProblems.set(false);
       }
     });
-  }
-
-  /** Helper: problems not yet added, shown in the "add" dropdown */
-  get availableToAdd(): ProblemDto[] {
-    const usedIds = new Set(this.problemRows().map(r => r.problem_id));
-    return this.allProblems().filter(p => !usedIds.has(p.id));
   }
 
   goBack(): void {

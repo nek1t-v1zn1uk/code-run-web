@@ -28,6 +28,9 @@ export class ProblemService {
         if (request.topicName) {
             params = params.set('topicName', request.topicName);
         }
+        if (request.searchQuery) {
+            params = params.set('searchQuery', request.searchQuery);
+        }
         if (request.cursor) {
             params = params.set('cursor', request.cursor);
         }
@@ -41,6 +44,9 @@ export class ProblemService {
         }
         if (request.topicName) {
             params = params.set('topicName', request.topicName);
+        }
+        if (request.searchQuery) {
+            params = params.set('searchQuery', request.searchQuery);
         }
         if (request.cursor) {
             params = params.set('cursor', request.cursor);

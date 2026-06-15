@@ -45,6 +45,7 @@ export interface Problem {
 export interface ProblemsRequest {
     difficulty?: string;
     topicName?: string;
+    searchQuery?: string;
     limit: number;
     cursor?: string;
 }

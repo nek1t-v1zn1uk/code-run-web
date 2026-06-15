@@ -1,6 +1,8 @@
 import { Component, OnInit, OnDestroy, AfterViewInit, signal, ElementRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ProblemService } from '../../services/problem.service';
 import { ProblemDto, Topic } from '../../models/problem.models';
 
@@ -17,8 +19,10 @@ export class ProblemsList implements OnInit, OnDestroy, AfterViewInit {
     protected readonly isLoadingMore = signal<boolean>(false);
     protected readonly selectedTopic = signal<string>('');
     protected readonly selectedDifficulty = signal<string>('');
+    protected readonly searchQuery = signal<string>('');
     protected readonly hasMore = signal<boolean>(true);
 
+    private searchSubject = new Subject<string>();
     private el = inject(ElementRef);
     private nextCursor: string | null = null;
     private readonly pageSize = 20;
@@ -28,7 +32,15 @@ export class ProblemsList implements OnInit, OnDestroy, AfterViewInit {
     constructor(
         private problemService: ProblemService,
         private router: Router
-    ) { }
+    ) { 
+        this.searchSubject.pipe(
+            debounceTime(300),
+            distinctUntilChanged()
+        ).subscribe(query => {
+            this.searchQuery.set(query);
+            this.loadProblems(true);
+        });
+    }
 
     ngOnInit(): void {
         this.loadProblems(true);
@@ -47,6 +59,7 @@ export class ProblemsList implements OnInit, OnDestroy, AfterViewInit {
         if (this.scrollContainer) {
             this.scrollContainer.removeEventListener('scroll', this.boundScrollHandler);
         }
+        this.searchSubject.complete();
     }
 
     private findScrollParent(node: HTMLElement): Element | null {
@@ -91,6 +104,9 @@ export class ProblemsList implements OnInit, OnDestroy, AfterViewInit {
         if (this.selectedTopic()) {
             request.topicName = this.selectedTopic();
         }
+        if (this.searchQuery()) {
+            request.searchQuery = this.searchQuery();
+        }
         if (this.nextCursor) {
             request.cursor = this.nextCursor;
         }
@@ -124,6 +140,11 @@ export class ProblemsList implements OnInit, OnDestroy, AfterViewInit {
                 console.error('Error loading topics:', error);
             }
         });
+    }
+
+    protected onSearchInput(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        this.searchSubject.next(input.value);
     }
 
     protected onTopicChange(event: Event): void {
