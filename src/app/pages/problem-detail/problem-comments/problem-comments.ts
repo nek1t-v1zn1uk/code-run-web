@@ -6,6 +6,7 @@ import { CommentDto, CreateCommentDto } from '../../../models/comment.models';
 import { SolutionDto } from '../../../models/solution.models';
 import { SolutionService } from '../../../services/solution.service';
 import { AuthService } from '../../../services/auth.service';
+import { UserService } from '../../../services/user.service';
 
 import { RouterModule } from '@angular/router';
 
@@ -32,13 +33,19 @@ export class ProblemComments implements OnInit {
   constructor(
     private commentService: CommentService,
     private solutionService: SolutionService,
-    public authService: AuthService
+    public authService: AuthService,
+    private userService: UserService
   ) {}
 
   ngOnInit(): void {
     if (this.problemId) {
       this.loadComments();
     }
+  }
+
+  getAvatarUrl(photoUrl: string | null | undefined): string | null {
+    if (!photoUrl) return null;
+    return this.userService.getAvatarUrl(photoUrl);
   }
 
   loadComments(): void {

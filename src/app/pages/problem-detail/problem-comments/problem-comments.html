@@ -25,7 +25,7 @@
         <div class="comment-card">
           <div class="comment-header">
             <div class="author-info">
-              <img *ngIf="comment.user_photo_url" [src]="comment.user_photo_url" alt="Avatar" class="author-avatar" />
+              <img *ngIf="comment.user_photo_url" [src]="getAvatarUrl(comment.user_photo_url)" alt="Avatar" class="author-avatar" />
               <div *ngIf="!comment.user_photo_url" class="author-avatar-placeholder">
                 {{ comment.user_first_name?.charAt(0) | uppercase }}
               </div>

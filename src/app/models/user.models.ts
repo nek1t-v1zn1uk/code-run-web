@@ -12,3 +12,8 @@ export interface UpdateProfileRequest {
     first_name: string;
     last_name?: string | null;
 }
+
+export interface ChangePasswordRequest {
+    old_password: string;
+    new_password: string;
+}

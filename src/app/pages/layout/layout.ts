@@ -23,6 +23,7 @@ export class Layout implements OnInit, OnDestroy {
   activeContestTab = signal<'overview' | 'contesting' | 'scoreboard' | null>(null);
   userProfile = signal<UserProfileDto | null>(null);
   private routerSub!: Subscription;
+  private profileSub!: Subscription;
 
   ngOnInit() {
     this.checkUrl(this.router.url);
@@ -32,6 +33,11 @@ export class Layout implements OnInit, OnDestroy {
       this.checkUrl(event.urlAfterRedirects);
     });
     
+    // Listen to profile updates globally
+    this.profileSub = this.userService.profileUpdated$.subscribe(profile => {
+      this.userProfile.set(profile);
+    });
+
     this.userService.getProfile().subscribe({
       next: (profile) => this.userProfile.set(profile),
       error: (err) => console.error('Failed to load user profile', err)
@@ -40,6 +46,7 @@ export class Layout implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     if (this.routerSub) this.routerSub.unsubscribe();
+    if (this.profileSub) this.profileSub.unsubscribe();
   }
 
   private checkUrl(url: string) {

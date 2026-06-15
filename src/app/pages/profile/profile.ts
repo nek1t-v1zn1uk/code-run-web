@@ -20,15 +20,37 @@ export class Profile implements OnInit {
   isLoading = signal(true);
   isSaving = signal(false);
   isUploading = signal(false);
-  message = signal<{text: string, type: 'success' | 'error'} | null>(null);
+  
+  // Custom Toasts array
+  toasts = signal<{id: number, text: string, type: 'success' | 'error'}[]>([]);
+  private toastIdCounter = 0;
 
   profileForm: FormGroup;
+  passwordForm: FormGroup;
+  activeTab: 'general' | 'security' = 'general';
+  isChangingPassword = signal(false);
+  
+  showOldPassword = signal(false);
+  showNewPassword = signal(false);
+  showConfirmPassword = signal(false);
 
   constructor() {
     this.profileForm = this.fb.group({
       firstName: ['', [Validators.required, Validators.maxLength(32)]],
       lastName: ['', [Validators.maxLength(32)]]
     });
+
+    this.passwordForm = this.fb.group({
+      oldPassword: ['', [Validators.required]],
+      newPassword: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(64)]],
+      confirmPassword: ['', [Validators.required]]
+    }, { validators: this.passwordMatchValidator });
+  }
+
+  private passwordMatchValidator(g: FormGroup) {
+    const newPass = g.get('newPassword')?.value;
+    const confirmPass = g.get('confirmPassword')?.value;
+    return newPass === confirmPass ? null : { mismatch: true };
   }
 
   ngOnInit(): void {
@@ -46,7 +68,7 @@ export class Profile implements OnInit {
         this.isLoading.set(false);
       },
       error: (err: any) => {
-        this.showMessage('Failed to load profile', 'error');
+        this.showToast('Failed to load profile data.', 'error');
         this.isLoading.set(false);
       }
     });
@@ -65,14 +87,14 @@ export class Profile implements OnInit {
     if (!p) return '';
     const first = p.first_name?.charAt(0) || '';
     const last = p.last_name?.charAt(0) || '';
-    return (first + last).toUpperCase();
+    return (first + last).toUpperCase() || 'U';
   }
 
   onFileSelected(event: any): void {
     const file: File = event.target.files[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        this.showMessage('File is too large. Maximum size is 5MB', 'error');
+        this.showToast('File is too large. Maximum size is 5MB.', 'error');
         return;
       }
 
@@ -81,25 +103,25 @@ export class Profile implements OnInit {
         next: (data: UserProfileDto) => {
           this.profile.set(data);
           this.isUploading.set(false);
-          this.showMessage('Avatar updated successfully', 'success');
+          this.showToast('Avatar updated successfully!', 'success');
         },
         error: (err: any) => {
           this.isUploading.set(false);
-          this.showMessage('Failed to upload avatar', 'error');
+          this.showToast('Failed to upload avatar.', 'error');
         }
       });
     }
   }
 
   deleteAvatar(): void {
-    if (confirm('Are you sure you want to delete your avatar?')) {
+    if (confirm('Are you sure you want to remove your avatar?')) {
       this.userService.deleteAvatar().subscribe({
         next: (data: UserProfileDto) => {
           this.profile.set(data);
-          this.showMessage('Avatar removed successfully', 'success');
+          this.showToast('Avatar removed successfully.', 'success');
         },
         error: (err: any) => {
-          this.showMessage('Failed to remove avatar', 'error');
+          this.showToast('Failed to remove avatar.', 'error');
         }
       });
     }
@@ -107,6 +129,7 @@ export class Profile implements OnInit {
 
   saveProfile(): void {
     if (this.profileForm.invalid) {
+      this.profileForm.markAllAsTouched();
       return;
     }
 
@@ -120,19 +143,53 @@ export class Profile implements OnInit {
       next: (data: UserProfileDto) => {
         this.profile.set(data);
         this.isSaving.set(false);
-        this.showMessage('Profile updated successfully', 'success');
+        this.showToast('Profile saved successfully.', 'success');
       },
       error: (err: any) => {
         this.isSaving.set(false);
-        this.showMessage('Failed to update profile', 'error');
+        this.showToast('Failed to save profile.', 'error');
       }
     });
   }
 
-  private showMessage(text: string, type: 'success' | 'error'): void {
-    this.message.set({ text, type });
+  changePassword(): void {
+    if (this.passwordForm.invalid) {
+      this.passwordForm.markAllAsTouched();
+      return;
+    }
+
+    this.isChangingPassword.set(true);
+    const formValue = this.passwordForm.value;
+
+    this.userService.changePassword({
+      old_password: formValue.oldPassword,
+      new_password: formValue.newPassword
+    }).subscribe({
+      next: () => {
+        this.isChangingPassword.set(false);
+        this.showToast('Password changed successfully.', 'success');
+        this.passwordForm.reset();
+      },
+      error: (err: any) => {
+        this.isChangingPassword.set(false);
+        // Display specific error message if applicable
+        const msg = err?.error?.message || 'Failed to change password. Check your old password.';
+        this.showToast(msg, 'error');
+      }
+    });
+  }
+
+  showToast(text: string, type: 'success' | 'error'): void {
+    const id = this.toastIdCounter++;
+    this.toasts.update(current => [...current, { id, text, type }]);
+    
     setTimeout(() => {
-      this.message.set(null);
-    }, 3000);
+      this.removeToast(id);
+    }, 4000);
+  }
+
+  removeToast(id: number): void {
+    this.toasts.update(current => current.filter(t => t.id !== id));
   }
 }
+

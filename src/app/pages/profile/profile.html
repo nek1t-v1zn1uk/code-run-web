@@ -1,104 +1,214 @@
-<div class="profile-page">
-  <div class="profile-container premium-glass">
-    <h2>Your Profile</h2>
-
-    <!-- Messages -->
-    @if (message()) {
-      <div class="message" [class.success]="message()?.type === 'success'" [class.error]="message()?.type === 'error'">
-        {{ message()?.text }}
+<div class="profile-dashboard">
+  
+  <!-- Toasts Notification Area -->
+  <div class="toast-container">
+    @for (toast of toasts(); track toast.id) {
+      <div class="toast" [class.success]="toast.type === 'success'" [class.error]="toast.type === 'error'">
+        @if (toast.type === 'success') {
+          <i-lucide name="check-circle" class="toast-icon"></i-lucide>
+        } @else {
+          <i-lucide name="alert-circle" class="toast-icon"></i-lucide>
+        }
+        <span>{{ toast.text }}</span>
+        <button class="toast-close" (click)="removeToast(toast.id)">
+          <i-lucide name="x" class="close-icon"></i-lucide>
+        </button>
       </div>
     }
+  </div>
 
-    <!-- Avatar Section -->
-    <div class="avatar-section">
-      <div class="avatar-wrapper" (click)="fileInput.click()">
-        @if (getAvatarUrl()) {
-          <img [src]="getAvatarUrl()" alt="Profile Avatar" class="avatar-img">
-        } @else {
-          <div class="avatar-initials">{{ getUserInitials() }}</div>
-        }
-        
-        <div class="avatar-overlay">
-          <i-lucide name="camera" class="overlay-icon"></i-lucide>
-          <span>Change Photo</span>
-        </div>
-        
-        @if (isUploading()) {
-          <div class="avatar-uploading">
-            <div class="spinner"></div>
-          </div>
-        }
-      </div>
-      
-      <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/png, image/jpeg, image/gif, image/webp" style="display: none;">
-      
-      @if (profile()?.photo_url) {
-        <button class="delete-btn" (click)="deleteAvatar()" title="Delete Avatar">
-          <i-lucide name="x" class="delete-icon"></i-lucide>
-        </button>
-      }
+  @if (isLoading()) {
+    <div class="loading-state premium-glass">
+      <div class="spinner"></div>
+      <p>Loading your dashboard...</p>
     </div>
+  } @else {
+    <div class="dashboard-grid">
+      
+      <!-- Left Column: Identity Card -->
+      <aside class="identity-card premium-glass">
+        <!-- Background Flare inside card -->
+        <div class="card-flare"></div>
 
-    @if (isLoading()) {
-      <div class="loading-state">
-        <div class="spinner"></div>
-        <p>Loading profile...</p>
-      </div>
-    } @else {
-      <!-- Profile Form -->
-      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="profile-form">
-        
-        <div class="form-group">
-          <label for="firstName">First Name</label>
-          <input type="text" id="firstName" formControlName="firstName" class="premium-input" placeholder="Enter first name">
-          @if (profileForm.get('firstName')?.invalid && profileForm.get('firstName')?.touched) {
-            <span class="error-text">First name is required (max 32 chars).</span>
-          }
-        </div>
-
-        <div class="form-group">
-          <label for="lastName">Last Name (Optional)</label>
-          <input type="text" id="lastName" formControlName="lastName" class="premium-input" placeholder="Enter last name">
-          @if (profileForm.get('lastName')?.invalid && profileForm.get('lastName')?.touched) {
-            <span class="error-text">Last name must be max 32 chars.</span>
-          }
-        </div>
-
-        <div class="form-group readonly-group">
-          <label>Email Address</label>
-          <div class="readonly-input">
-            <i-lucide name="lock" class="lock-icon"></i-lucide>
-            <span>{{ profile()?.email }}</span>
-          </div>
-        </div>
-        
-        <div class="form-row">
-          <div class="form-group info-group">
-            <label>Role</label>
-            <div class="role-badge" [class.admin]="profile()?.role === 'ADMIN'">
-              {{ profile()?.role }}
+        <div class="avatar-container">
+          <div class="avatar-ring" [class.admin-ring]="profile()?.role === 'ADMIN'">
+            <div class="avatar-wrapper" (click)="fileInput.click()">
+              @if (getAvatarUrl()) {
+                <img [src]="getAvatarUrl()" alt="Profile Avatar" class="avatar-img">
+              } @else {
+                <div class="avatar-initials">{{ getUserInitials() }}</div>
+              }
+              
+              <div class="avatar-overlay">
+                <i-lucide name="camera" class="overlay-icon"></i-lucide>
+                <span>Upload</span>
+              </div>
+              
+              @if (isUploading()) {
+                <div class="avatar-uploading">
+                  <div class="spinner-small"></div>
+                </div>
+              }
             </div>
           </div>
           
-          <div class="form-group info-group">
-            <label>Member Since</label>
-            <div class="info-value">{{ profile()?.created_at | date:'mediumDate' }}</div>
+          <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/png, image/jpeg, image/gif, image/webp" style="display: none;">
+          
+          @if (profile()?.photo_url) {
+            <button class="delete-avatar-btn" (click)="deleteAvatar()" title="Remove Avatar">
+              <i-lucide name="trash-2"></i-lucide>
+            </button>
+          }
+        </div>
+
+        <div class="user-info">
+          <h2 class="user-name">{{ profile()?.first_name }} {{ profile()?.last_name }}</h2>
+          <div class="role-badge" [class.admin]="profile()?.role === 'ADMIN'">
+            {{ profile()?.role }}
           </div>
+          <p class="member-since">
+            <i-lucide name="calendar" class="meta-icon"></i-lucide>
+            Joined {{ profile()?.created_at | date:'longDate' }}
+          </p>
         </div>
 
-        <div class="form-actions">
-          <button type="submit" class="premium-button save-btn" [disabled]="profileForm.invalid || isSaving()">
-            @if (isSaving()) {
-              <div class="spinner small"></div>
-              <span>Saving...</span>
-            } @else {
-              <span>Save Changes</span>
-            }
-          </button>
-        </div>
+      </aside>
+
+      <!-- Right Column: Settings Pane -->
+      <main class="settings-pane premium-glass">
         
-      </form>
-    }
+        <nav class="settings-tabs">
+          <button [class.active]="activeTab === 'general'" (click)="activeTab = 'general'">
+            <i-lucide name="user" class="tab-icon"></i-lucide>
+            General Info
+          </button>
+          <button [class.active]="activeTab === 'security'" (click)="activeTab = 'security'">
+            <i-lucide name="shield" class="tab-icon"></i-lucide>
+            Security
+          </button>
+        </nav>
 
-  </div>
+        <div class="tab-content">
+          @if (activeTab === 'general') {
+            <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="animated-form">
+            <h3 class="section-title">Personal Details</h3>
+            
+            <div class="form-grid">
+              <div class="input-group">
+                <label>First Name</label>
+                <div class="input-wrapper">
+                  <i-lucide name="user" class="input-icon"></i-lucide>
+                  <input type="text" formControlName="firstName" class="glass-input" placeholder="Enter first name">
+                </div>
+                @if (profileForm.get('firstName')?.invalid && profileForm.get('firstName')?.touched) {
+                  <span class="error-msg">First name is required.</span>
+                }
+              </div>
+
+              <div class="input-group">
+                <label>Last Name <span class="optional-tag">(Optional)</span></label>
+                <div class="input-wrapper">
+                  <i-lucide name="user" class="input-icon"></i-lucide>
+                  <input type="text" formControlName="lastName" class="glass-input" placeholder="Enter last name">
+                </div>
+                @if (profileForm.get('lastName')?.invalid && profileForm.get('lastName')?.touched) {
+                  <span class="error-msg">Maximum 32 characters.</span>
+                }
+              </div>
+            </div>
+
+            <h3 class="section-title mt-4">Account Information</h3>
+            
+            <div class="form-grid">
+              <div class="input-group readonly-group">
+                <label>Email Address</label>
+                <div class="readonly-box">
+                  <i-lucide name="mail" class="input-icon"></i-lucide>
+                  <span>{{ profile()?.email }}</span>
+                  <i-lucide name="lock" class="lock-icon" title="Email cannot be changed"></i-lucide>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="save-btn" [disabled]="profileForm.invalid || isSaving()">
+                @if (isSaving()) {
+                  <div class="spinner-small"></div>
+                  <span>Saving...</span>
+                } @else {
+                  <span>Save Changes</span>
+                }
+              </button>
+            </div>
+          </form>
+          }
+
+          @if (activeTab === 'security') {
+            <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="animated-form">
+              <h3 class="section-title">Change Password</h3>
+              
+              <div class="form-grid">
+                <div class="input-group">
+                  <label>Current Password</label>
+                  <div class="input-wrapper">
+                    <i-lucide name="lock" class="input-icon"></i-lucide>
+                    <input [type]="showOldPassword() ? 'text' : 'password'" formControlName="oldPassword" class="glass-input" placeholder="Enter current password">
+                    <button type="button" class="toggle-password" (click)="showOldPassword.set(!showOldPassword())" tabindex="-1">
+                      <i-lucide [name]="showOldPassword() ? 'eye-off' : 'eye'"></i-lucide>
+                    </button>
+                  </div>
+                  @if (passwordForm.get('oldPassword')?.invalid && passwordForm.get('oldPassword')?.touched) {
+                    <span class="error-msg">Current password is required.</span>
+                  }
+                </div>
+              </div>
+
+              <div class="form-grid mt-4">
+                <div class="input-group">
+                  <label>New Password</label>
+                  <div class="input-wrapper">
+                    <i-lucide name="lock" class="input-icon"></i-lucide>
+                    <input [type]="showNewPassword() ? 'text' : 'password'" formControlName="newPassword" class="glass-input" placeholder="Enter new password">
+                    <button type="button" class="toggle-password" (click)="showNewPassword.set(!showNewPassword())" tabindex="-1">
+                      <i-lucide [name]="showNewPassword() ? 'eye-off' : 'eye'"></i-lucide>
+                    </button>
+                  </div>
+                  @if (passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched) {
+                    <span class="error-msg">Must be 6-64 characters.</span>
+                  }
+                </div>
+
+                <div class="input-group">
+                  <label>Confirm New Password</label>
+                  <div class="input-wrapper">
+                    <i-lucide name="lock" class="input-icon"></i-lucide>
+                    <input [type]="showConfirmPassword() ? 'text' : 'password'" formControlName="confirmPassword" class="glass-input" placeholder="Confirm new password">
+                    <button type="button" class="toggle-password" (click)="showConfirmPassword.set(!showConfirmPassword())" tabindex="-1">
+                      <i-lucide [name]="showConfirmPassword() ? 'eye-off' : 'eye'"></i-lucide>
+                    </button>
+                  </div>
+                  @if (passwordForm.hasError('mismatch') && passwordForm.get('confirmPassword')?.touched) {
+                    <span class="error-msg">Passwords do not match.</span>
+                  }
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="save-btn" [disabled]="passwordForm.invalid || isChangingPassword()">
+                  @if (isChangingPassword()) {
+                    <div class="spinner-small"></div>
+                    <span>Updating...</span>
+                  } @else {
+                    <span>Update Password</span>
+                  }
+                </button>
+              </div>
+            </form>
+          }
+        </div>
+
+      </main>
+
+    </div>
+  }
 </div>
