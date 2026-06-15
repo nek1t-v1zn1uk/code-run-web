@@ -1,3 +1,54 @@
+<ng-template #mdEditor>
+  <div class="md-editor-container premium-glass" [class.is-fullscreen]="isFullscreen">
+    <div class="editor-toolbar">
+      <div class="md-tabs">
+        <button type="button" [class.active]="!showPreview && !splitView" (click)="showPreview = false; splitView = false">Write</button>
+        <button type="button" [class.active]="splitView" (click)="splitView = true; showPreview = false; updatePreview()">Split</button>
+        <button type="button" [class.active]="showPreview && !splitView" (click)="showPreview = true; splitView = false; updatePreview()">Preview</button>
+      </div>
+      <div class="md-actions">
+        <div class="md-format-group" [class.hidden]="showPreview && !splitView">
+          <button type="button" (click)="applyFormat('bold')" title="Bold">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path></svg>
+          </button>
+          <button type="button" (click)="applyFormat('italic')" title="Italic">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="4" x2="10" y2="4"></line><line x1="14" y1="20" x2="5" y2="20"></line><line x1="15" y1="4" x2="9" y2="20"></line></svg>
+          </button>
+          <button type="button" (click)="applyFormat('heading')" title="Heading">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16"></path><path d="M4 18V6"></path><path d="M20 18V6"></path></svg>
+          </button>
+          <div class="toolbar-divider"></div>
+          <button type="button" (click)="applyFormat('code')" title="Code Block">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+          </button>
+          <button type="button" (click)="applyFormat('link')" title="Link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+          </button>
+          <button type="button" (click)="applyFormat('list')" title="Bullet List">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+          </button>
+          <div class="toolbar-divider"></div>
+        </div>
+        <button type="button" (click)="toggleFullscreen()" [title]="isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'">
+          @if (isFullscreen) {
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path></svg>
+          } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+          }
+        </button>
+      </div>
+    </div>
+    <div class="md-editor-body" [class.split-layout]="splitView" [formGroup]="problemForm">
+      @if (!showPreview || splitView) {
+        <textarea #mdTextarea formControlName="statement" (input)="splitView ? updatePreview() : null" placeholder="Use Markdown to describe the task..."></textarea>
+      }
+      @if (showPreview || splitView) {
+        <div class="md-preview markdown-content" [innerHTML]="previewHtml()"></div>
+      }
+    </div>
+  </div>
+</ng-template>
+
 <div class="editor-container">
   <div class="editor-header">
     <div class="header-left">
@@ -170,18 +221,13 @@
             </div>
           </section>
 
+
+
           <section class="form-section statement-section">
-            <h3 class="section-title">Problem Statement (Markdown)</h3>
-            <div class="md-editor-container">
-              <div class="editor-toolbar">
-                <span>Editor</span>
-                <span>Preview</span>
-              </div>
-              <div class="md-split">
-                <textarea formControlName="statement" (input)="updatePreview()" placeholder="Use Markdown to describe the task..."></textarea>
-                <div class="md-preview markdown-content" [innerHTML]="previewHtml()"></div>
-              </div>
-            </div>
+            <h3 class="section-title">Problem Statement</h3>
+            @if (!isFullscreen) {
+              <ng-container *ngTemplateOutlet="mdEditor"></ng-container>
+            }
           </section>
         </div>
       }
@@ -277,3 +323,9 @@
     </main>
   </div>
 </div>
+
+@if (isFullscreen) {
+  <div class="fullscreen-overlay">
+    <ng-container *ngTemplateOutlet="mdEditor"></ng-container>
+  </div>
+}

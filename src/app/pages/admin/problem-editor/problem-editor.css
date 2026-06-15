@@ -303,47 +303,155 @@
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+}
+
+.fullscreen-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    padding: 3rem 10vw;
+    background: rgba(15, 12, 41, 0.95);
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+}
+
+.md-editor-container.is-fullscreen {
+    flex: 1;
+    margin: 0;
+    height: 100%;
+    min-height: 0; /* Let flex take over completely */
+}
+
+.md-editor-container.is-fullscreen .md-editor-body {
+    flex: 1;
+    min-height: 0; 
+}
+
+.md-editor-container.is-fullscreen textarea,
+.md-editor-container.is-fullscreen .md-preview {
+    min-height: 0;
 }
 
 .editor-toolbar {
     display: flex;
     background: rgba(255, 255, 255, 0.05);
-    padding: 0.75rem 1.5rem;
+    padding: 0.5rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    align-items: center;
     justify-content: space-between;
 }
 
-.editor-toolbar span {
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: #8a8aa3;
+.md-tabs {
+    display: flex;
+    gap: 0.5rem;
 }
 
-.md-split {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    min-height: 500px;
-}
-
-.md-split textarea {
+.md-tabs button {
     background: transparent;
     border: none;
+    color: #8a8aa3;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.md-tabs button:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.md-tabs button.active {
+    color: #ffffff;
+    background: rgba(102, 126, 234, 0.2);
+}
+
+.md-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.md-format-group {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.md-format-group.hidden {
+    display: none;
+}
+
+.md-actions button {
+    background: transparent;
+    border: none;
+    color: #8a8aa3;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.md-actions button:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.toolbar-divider {
+    width: 1px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 0 0.25rem;
+}
+
+.md-editor-body {
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.md-editor-body.split-layout {
+    flex-direction: row;
+}
+
+.md-editor-body.split-layout textarea {
     border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.md-editor-body textarea {
+    flex: 1;
+    background: transparent;
+    border: none;
     padding: 1.5rem;
     color: #d0d0e0;
     font-family: 'Fira Code', monospace;
     font-size: 0.95rem;
     line-height: 1.6;
-    resize: none;
+    resize: vertical;
+    min-height: 400px;
     outline: none;
 }
 
 .md-preview {
+    flex: 1;
     background: #ffffff;
     padding: 2rem;
     color: #1e293b;
     overflow-y: auto;
+    min-height: 400px;
 }
 
 /* Master-Detail Layout for Tests & Checkers */

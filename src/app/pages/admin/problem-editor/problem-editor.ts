@@ -177,6 +177,121 @@ export class ProblemEditor implements OnInit, AfterViewChecked {
     }
   }
 
+  showPreview = false;
+  splitView = false;
+  isFullscreen = false;
+  @ViewChild('mdTextarea') mdTextarea?: ElementRef<HTMLTextAreaElement>;
+
+  toggleFullscreen(): void {
+    this.isFullscreen = !this.isFullscreen;
+    if (this.isFullscreen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+  }
+
+  applyFormat(type: 'bold' | 'italic' | 'heading' | 'code' | 'link' | 'list'): void {
+    const textarea = this.mdTextarea?.nativeElement;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const currentText = this.problemForm.get('statement')?.value || '';
+    const selectedText = currentText.substring(start, end);
+
+    let newText = currentText;
+    let newStart = start;
+    let newEnd = end;
+
+    if (type === 'bold' || type === 'italic') {
+      const mark = type === 'bold' ? '**' : '*';
+      const markLen = mark.length;
+      
+      // Check if already wrapped
+      const before = currentText.substring(Math.max(0, start - markLen), start);
+      const after = currentText.substring(end, Math.min(currentText.length, end + markLen));
+      
+      if (before === mark && after === mark) {
+        // Unwrap
+        newText = currentText.substring(0, start - markLen) + selectedText + currentText.substring(end + markLen);
+        newStart = start - markLen;
+        newEnd = end - markLen;
+      } else {
+        // Wrap
+        newText = currentText.substring(0, start) + mark + selectedText + mark + currentText.substring(end);
+        newStart = start + markLen;
+        newEnd = end + markLen;
+        if (selectedText.length === 0) {
+          newEnd = newStart;
+        }
+      }
+    } else if (type === 'heading' || type === 'list') {
+      // Find start of lines involved
+      let lineStart = start;
+      while (lineStart > 0 && currentText[lineStart - 1] !== '\n') {
+        lineStart--;
+      }
+      let lineEnd = end;
+      while (lineEnd < currentText.length && currentText[lineEnd] !== '\n') {
+        lineEnd++;
+      }
+      
+      const linesText = currentText.substring(lineStart, lineEnd);
+      const lines = linesText.split('\n');
+      
+      let allHavePrefix = true;
+      const prefixMatch = type === 'heading' ? /^#\s/ : /^-\s/;
+      const prefixStr = type === 'heading' ? '# ' : '- ';
+      
+      for (const line of lines) {
+        if (!prefixMatch.test(line)) {
+          allHavePrefix = false;
+          break;
+        }
+      }
+      
+      let modifiedLines: string[] = [];
+      if (allHavePrefix) {
+        // Remove prefix
+        modifiedLines = lines.map((l: string) => l.substring(prefixStr.length));
+      } else {
+        // Add prefix, but remove existing if it's the other type or multiple #
+        modifiedLines = lines.map((l: string) => {
+          let cleaned = l.replace(/^(#+|-)\s/, '');
+          return prefixStr + cleaned;
+        });
+      }
+      
+      const replacement = modifiedLines.join('\n');
+      newText = currentText.substring(0, lineStart) + replacement + currentText.substring(lineEnd);
+      
+      newStart = lineStart;
+      newEnd = lineStart + replacement.length;
+    } else if (type === 'code') {
+      const wrap = '```\n';
+      newText = currentText.substring(0, start) + wrap + selectedText + '\n```' + currentText.substring(end);
+      newStart = start + wrap.length;
+      newEnd = newStart + selectedText.length;
+      if (selectedText.length === 0) newEnd = newStart;
+    } else if (type === 'link') {
+      newText = currentText.substring(0, start) + '[' + selectedText + '](url)' + currentText.substring(end);
+      newStart = start + 1;
+      newEnd = newStart + selectedText.length;
+      if (selectedText.length === 0) newEnd = newStart;
+    }
+
+    this.problemForm.patchValue({ statement: newText });
+    if (this.splitView) {
+      this.updatePreview();
+    }
+
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(newStart, newEnd);
+    }, 0);
+  }
+
   // --- TESTS LOGIC ---
   addTest(): void {
     const newTest = {
