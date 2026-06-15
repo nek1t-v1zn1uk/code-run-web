@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, signal, ElementRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ProblemService } from '../../services/problem.service';
@@ -10,17 +10,20 @@ import { ProblemDto, Topic } from '../../models/problem.models';
     templateUrl: './problems-list.html',
     styleUrl: './problems-list.css'
 })
-export class ProblemsList implements OnInit, OnDestroy {
+export class ProblemsList implements OnInit, OnDestroy, AfterViewInit {
     protected readonly problems = signal<ProblemDto[]>([]);
     protected readonly topics = signal<Topic[]>([]);
     protected readonly isLoading = signal<boolean>(true);
     protected readonly isLoadingMore = signal<boolean>(false);
     protected readonly selectedTopic = signal<string>('');
     protected readonly selectedDifficulty = signal<string>('');
+    protected readonly hasMore = signal<boolean>(true);
 
+    private el = inject(ElementRef);
     private nextCursor: string | null = null;
-    private hasNext = true;
     private readonly pageSize = 20;
+    private scrollContainer: Element | null = null;
+    private boundScrollHandler = this.onScroll.bind(this);
 
     constructor(
         private problemService: ProblemService,
@@ -32,8 +35,39 @@ export class ProblemsList implements OnInit, OnDestroy {
         this.loadTopics();
     }
 
+    ngAfterViewInit(): void {
+        // Walk up the DOM to find the actual scrolling ancestor
+        this.scrollContainer = this.findScrollParent(this.el.nativeElement);
+        if (this.scrollContainer) {
+            this.scrollContainer.addEventListener('scroll', this.boundScrollHandler, { passive: true });
+        }
+    }
+
     ngOnDestroy(): void {
-        // Cleanup if needed
+        if (this.scrollContainer) {
+            this.scrollContainer.removeEventListener('scroll', this.boundScrollHandler);
+        }
+    }
+
+    private findScrollParent(node: HTMLElement): Element | null {
+        let current: HTMLElement | null = node.parentElement;
+        while (current) {
+            const style = window.getComputedStyle(current);
+            const overflowY = style.overflowY;
+            if (overflowY === 'auto' || overflowY === 'scroll') {
+                return current;
+            }
+            current = current.parentElement;
+        }
+        return null;
+    }
+
+    private onScroll(): void {
+        if (!this.scrollContainer) return;
+        const { scrollTop, scrollHeight, clientHeight } = this.scrollContainer;
+        if (scrollTop + clientHeight >= scrollHeight - 300) {
+            this.loadMoreProblems();
+        }
     }
 
     private loadProblems(reset: boolean = false): void {
@@ -41,8 +75,9 @@ export class ProblemsList implements OnInit, OnDestroy {
             this.isLoading.set(true);
             this.problems.set([]);
             this.nextCursor = null;
-            this.hasNext = true;
+            this.hasMore.set(true);
         } else {
+            if (this.isLoadingMore()) return; // prevent duplicate calls
             this.isLoadingMore.set(true);
         }
 
@@ -50,7 +85,6 @@ export class ProblemsList implements OnInit, OnDestroy {
             limit: this.pageSize
         };
 
-        // Add filters
         if (this.selectedDifficulty()) {
             request.difficulty = this.selectedDifficulty();
         }
@@ -68,7 +102,7 @@ export class ProblemsList implements OnInit, OnDestroy {
                 } else {
                     this.problems.set([...this.problems(), ...response.content]);
                 }
-                this.hasNext = response.has_next;
+                this.hasMore.set(response.has_next);
                 this.nextCursor = response.next_cursor || null;
                 this.isLoading.set(false);
                 this.isLoadingMore.set(false);
@@ -104,19 +138,8 @@ export class ProblemsList implements OnInit, OnDestroy {
         this.loadProblems(true);
     }
 
-    @HostListener('window:scroll')
-    onScroll(): void {
-        const scrollPosition = window.innerHeight + window.scrollY;
-        const documentHeight = document.documentElement.scrollHeight;
-
-        // Load more when user is 200px from bottom
-        if (scrollPosition >= documentHeight - 200) {
-            this.loadMoreProblems();
-        }
-    }
-
-    private loadMoreProblems(): void {
-        if (!this.isLoading() && !this.isLoadingMore() && this.hasNext) {
+    protected loadMoreProblems(): void {
+        if (!this.isLoading() && !this.isLoadingMore() && this.hasMore()) {
             this.loadProblems(false);
         }
     }
