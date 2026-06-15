@@ -58,6 +58,10 @@ export const routes: Routes = [
                 canActivate: [adminGuard],
                 children: [
                     {
+                        path: 'topics',
+                        loadComponent: () => import('./pages/admin/topics-list/topics-list').then(m => m.TopicsList)
+                    },
+                    {
                         path: 'problems',
                         loadComponent: () => import('./pages/admin/problems-list/problems-list').then(m => m.AdminProblemsList)
                     },

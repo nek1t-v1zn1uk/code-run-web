@@ -1,0 +1,80 @@
+<div class="page-container">
+  <div class="header-section">
+    <div class="title-area">
+      <h1>Manage Topics</h1>
+      <p>Create, rename, or delete problem topics.</p>
+    </div>
+    <div class="actions-area">
+      <button class="btn btn-primary" (click)="startCreate()" *ngIf="!isCreating">
+        <i data-lucide="plus"></i> New Topic
+      </button>
+    </div>
+  </div>
+
+  <!-- Create Form -->
+  <div class="create-card premium-glass" *ngIf="isCreating">
+    <h3>Create New Topic</h3>
+    <div class="form-row">
+      <input type="text" [(ngModel)]="newTopicName" class="glass-input" placeholder="Topic Name (e.g. Dynamic Programming)" (keyup.enter)="submitCreate()">
+      <button class="btn btn-success" (click)="submitCreate()" [disabled]="!newTopicName.trim()">Save</button>
+      <button class="btn btn-secondary" (click)="cancelCreate()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading()">
+    <div class="spinner"></div>
+    <p>Loading topics...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state premium-glass" *ngIf="!isLoading() && topics().length === 0">
+    <p>No topics found.</p>
+  </div>
+
+  <!-- Topics Table -->
+  <div class="table-container premium-glass" *ngIf="!isLoading() && topics().length > 0">
+    <table class="glass-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Topic Name</th>
+          <th class="actions-col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (topic of topics(); track topic.id) {
+          <tr>
+            <td>#{{ topic.id }}</td>
+            <td>
+              <ng-container *ngIf="editingTopicId !== topic.id">
+                <span class="topic-name">{{ topic.name }}</span>
+              </ng-container>
+              <ng-container *ngIf="editingTopicId === topic.id">
+                <input type="text" [(ngModel)]="editingTopicName" class="glass-input edit-input" (keyup.enter)="submitEdit()">
+              </ng-container>
+            </td>
+            <td class="actions-col">
+              <ng-container *ngIf="editingTopicId !== topic.id">
+                <button class="icon-btn edit-btn" (click)="startEdit(topic)" title="Edit">
+                  Edit
+                </button>
+                <button class="icon-btn delete-btn" (click)="deleteTopic(topic)" title="Delete">
+                  Delete
+                </button>
+              </ng-container>
+              <ng-container *ngIf="editingTopicId === topic.id">
+                <button class="icon-btn save-btn" (click)="submitEdit()" title="Save">
+                  Save
+                </button>
+                <button class="icon-btn cancel-btn" (click)="cancelEdit()" title="Cancel">
+                  Cancel
+                </button>
+              </ng-container>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

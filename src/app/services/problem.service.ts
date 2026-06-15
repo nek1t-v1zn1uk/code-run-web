@@ -56,6 +56,18 @@ export class ProblemService {
         return this.http.get<ProblemTopic[]>(`${this.baseUrl}/topics`);
     }
 
+    createTopic(name: string): Observable<ProblemTopic> {
+        return this.http.post<ProblemTopic>(`${environment.apiUrl}/v1/admin/topics`, { name });
+    }
+
+    updateTopic(id: number, name: string): Observable<ProblemTopic> {
+        return this.http.put<ProblemTopic>(`${environment.apiUrl}/v1/admin/topics/${id}`, { name });
+    }
+
+    deleteTopic(id: number): Observable<void> {
+        return this.http.delete<void>(`${environment.apiUrl}/v1/admin/topics/${id}`);
+    }
+
     createProblem(request: CreateProblemRequest): Observable<ProblemDto> {
         return this.http.post<ProblemDto>(this.baseUrl, request);
     }

@@ -60,7 +60,7 @@ export class ProblemEditor implements OnInit, AfterViewChecked {
 
   problemForm: FormGroup = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(3)]],
-    topic: [null],
+    topic_id: [null],
     difficulty: [ProblemDifficulty.MEDIUM, Validators.required],
     statement: ['', [Validators.required, Validators.minLength(10)]],
     execution_time_limit_ms: [1000, [Validators.required, Validators.min(500)]],
@@ -120,7 +120,7 @@ export class ProblemEditor implements OnInit, AfterViewChecked {
     this.problemService.getProblemById(this.problemId).subscribe(problem => {
       this.problemForm.patchValue({
         title: problem.title,
-        topic: problem.topic?.name ?? null,
+        topic_id: problem.topic?.id ?? null,
         difficulty: problem.difficulty,
         statement: problem.statement,
         execution_time_limit_ms: problem.execution_time_limit_ms,
@@ -345,7 +345,7 @@ export class ProblemEditor implements OnInit, AfterViewChecked {
 
         const updatedProblem = {
           ...formVal,
-          topic: formVal.topic || null,
+          topic_id: formVal.topic_id || null,
           default_script_checker_id: defaultCheckerId
         };
 

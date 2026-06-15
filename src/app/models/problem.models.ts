@@ -19,10 +19,12 @@ export interface ExampleTestDto {
 }
 
 export interface Topic {
+    id?: number;
     name: string;
 }
 
 export interface ProblemTopic {
+    id?: number;
     name: string;
 }
 
@@ -71,7 +73,7 @@ export interface ProblemDto {
 
 export interface CreateProblemRequest {
     title: string;
-    topic?: string | null;
+    topic_id?: number | null;
     difficulty: ProblemDifficulty;
     statement: string;
     execution_time_limit_ms: number;
@@ -83,7 +85,7 @@ export interface CreateProblemRequest {
 
 export interface UpdateProblemRequest {
     title?: string | null;
-    topic?: string | null;
+    topic_id?: number | null;
     difficulty?: ProblemDifficulty | null;
     statement?: string | null;
     execution_time_limit_ms?: number | null;

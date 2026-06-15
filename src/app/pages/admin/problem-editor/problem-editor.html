@@ -122,10 +122,10 @@
               </div>
               <div class="form-group">
                 <label>Topic</label>
-                <select formControlName="topic" class="glass-select">
+                <select formControlName="topic_id" class="glass-select">
                   <option [ngValue]="null">General / No Topic</option>
-                  @for (t of topics; track t.name) {
-                    <option [value]="t.name">{{ t.name }}</option>
+                  @for (t of topics; track t.id) {
+                    <option [ngValue]="t.id">{{ t.name }}</option>
                   }
                 </select>
               </div>
