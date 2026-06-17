@@ -283,6 +283,13 @@
     flex-direction: column;
 }
 
+.solution-index {
+    font-weight: 700;
+    color: #e2e8f0;
+    font-size: 1.1rem;
+    margin-right: 0.25rem;
+}
+
 .history-header {
     display: flex;
     justify-content: space-between;

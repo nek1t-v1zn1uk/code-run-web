@@ -40,10 +40,10 @@ import { LucideAngularModule } from 'lucide-angular';
                 <div class="cb-info">
                   <span class="badge active-badge">🔴 LIVE NOW</span>
                   <h2>{{ data.active_contest.name }}</h2>
-                  <p>Join the battle and compete for the top spot on the leaderboard.</p>
+                  <p>Watch the competition unfold and track the live leaderboard.</p>
                 </div>
                 <div class="cb-action">
-                  <a [routerLink]="['/contests', data.active_contest.id]" class="btn btn-danger">Enter Contest</a>
+                  <a [routerLink]="['/contests', data.active_contest.id]" class="btn btn-primary">Watch Live</a>
                 </div>
               </div>
               
@@ -210,8 +210,8 @@ import { LucideAngularModule } from 'lucide-angular';
       transform: translateY(-2px);
     }
     .contest-banner.live {
-      background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(153, 27, 27, 0.1) 100%);
-      border: 1px solid rgba(239, 68, 68, 0.3);
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(236, 72, 153, 0.1) 100%);
+      border: 1px solid rgba(139, 92, 246, 0.3);
     }
     .contest-banner.upcoming {
       background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(180, 83, 9, 0.05) 100%);
@@ -229,12 +229,12 @@ import { LucideAngularModule } from 'lucide-angular';
       color: #e2e8f0;
     }
     .pulse-border {
-      animation: pulse-red 2s infinite;
+      animation: pulse-live 2s infinite;
     }
-    @keyframes pulse-red {
-      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-      70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    @keyframes pulse-live {
+      0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
     }
     
     /* Problems Dashboard */

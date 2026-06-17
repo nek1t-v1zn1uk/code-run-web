@@ -39,7 +39,7 @@
           <div class="comment-pinned" *ngIf="comment.pinned_solution_id">
             <span class="badge badge-info clickable" (click)="openSolution(comment.pinned_solution_id)" title="Click to view solution">Pinned {{ getSolutionDisplayInfo(comment.pinned_solution_id) }}</span>
           </div>
-          <div class="comment-footer" *ngIf="authService.isLoggedIn() && !isReply">
+          <div class="comment-footer" *ngIf="authService.isLoggedIn()">
             <button class="btn btn-sm btn-outline" (click)="setReplyingTo(comment.id)">Reply</button>
           </div>
         </div>

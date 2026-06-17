@@ -142,10 +142,11 @@
                 @if (solutions().length > 0) {
                 <div class="solutions-history">
                     <div class="history-list">
-                        @for (sol of solutions(); track sol.id) {
+                        @for (sol of solutions(); track sol.id; let idx = $index) {
                         <div class="history-item clickable" [ngClass]="'status-' + sol.status.toLowerCase()" (click)="viewSolution(sol)">
                             <div class="item-main">
                                 <div class="item-header">
+                                    <span class="solution-index">#{{ solutions().length - idx }}</span>
                                     <span class="status-badge solid-badge">{{ sol.status.replace('_', ' ') }}</span>
                                     <span class="lang-badge">{{ sol.language?.language | uppercase }}</span>
                                 </div>
