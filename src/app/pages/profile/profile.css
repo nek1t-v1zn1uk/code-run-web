@@ -417,11 +417,16 @@
 
 .input-icon {
   position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
   left: 1rem;
   width: 18px;
   height: 18px;
   color: #6b7280;
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .glass-input {
@@ -449,6 +454,8 @@
 
 .toggle-password {
   position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
   right: 1rem;
   background: none;
   border: none;
@@ -468,6 +475,9 @@
 .toggle-password i-lucide {
   width: 18px;
   height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .error-msg {
@@ -482,11 +492,11 @@
 }
 
 .readonly-box {
-  position: relative;
   display: flex;
   align-items: center;
+  gap: 0.75rem;
   width: 100%;
-  padding: 0.9rem 1rem 0.9rem 2.8rem;
+  padding: 0.9rem 1rem;
   background: rgba(255, 255, 255, 0.02);
   border: 1px dashed rgba(255, 255, 255, 0.1);
   border-radius: 12px;
@@ -494,12 +504,18 @@
   font-size: 0.95rem;
 }
 
-.lock-icon {
-  position: absolute;
-  right: 1rem;
-  width: 16px;
-  height: 16px;
-  color: #4b5563;
+.readonly-box span {
+  flex: 1;
+}
+
+.readonly-box .input-icon, .readonly-box .lock-icon {
+  position: static;
+  transform: none;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Save Button */

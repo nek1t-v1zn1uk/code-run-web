@@ -23,7 +23,7 @@ export class CodeRunner implements OnInit, AfterViewInit, OnDestroy {
 
     private editor?: monaco.editor.IStandaloneCodeEditor;
 
-    protected readonly selectedLanguage = signal<SupportedLanguage>('python');
+    protected readonly selectedLanguage = signal<SupportedLanguage>('c');
     protected readonly code = signal<string>('');
     protected readonly inputData = signal<string>('');
     protected readonly output = signal<string>('');
@@ -34,16 +34,12 @@ export class CodeRunner implements OnInit, AfterViewInit, OnDestroy {
         {
             id: 'c',
             name: 'C',
-            defaultCode: `// C Code Runner
-#include <stdio.h>
-#include <string.h>
-
-void greet(const char* name) {
-    printf("Hello, %s! Welcome to Code Runner.\\n", name);
-}
+            defaultCode: `#include <stdio.h>
 
 int main() {
-    greet("Developer");
+    char name[100];
+    scanf("%s", name);
+    printf("Hello, %s\\n", name);
     return 0;
 }
 `
@@ -51,17 +47,13 @@ int main() {
         {
             id: 'cpp',
             name: 'C++',
-            defaultCode: `// C++ Code Runner
-#include <iostream>
+            defaultCode: `#include <iostream>
 #include <string>
 
-std::string greet(const std::string& name) {
-    return "Hello, " + name + "! Welcome to Code Runner.";
-}
-
 int main() {
-    std::string message = greet("Developer");
-    std::cout << message << std::endl;
+    std::string name;
+    std::cin >> name;
+    std::cout << "Hello, " << name << std::endl;
     return 0;
 }
 `
@@ -69,28 +61,20 @@ int main() {
         {
             id: 'python',
             name: 'Python',
-            defaultCode: `# Python Code Runner
-def greet(name):
-    """Greet someone with a friendly message."""
-    return f"Hello, {name}! Welcome to Code Runner."
-
-if __name__ == "__main__":
-    message = greet("Developer")
-    print(message)
+            defaultCode: `name = input()
+print(f"Hello, {name}")
 `
         },
         {
             id: 'java',
             name: 'Java',
-            defaultCode: `// Java Code Runner
+            defaultCode: `import java.util.Scanner;
+
 public class Main {
-    public static String greet(String name) {
-        return "Hello, " + name + "! Welcome to Code Runner.";
-    }
-    
     public static void main(String[] args) {
-        String message = greet("Developer");
-        System.out.println(message);
+        Scanner scanner = new Scanner(System.in);
+        String name = scanner.nextLine();
+        System.out.println("Hello, " + name);
     }
 }
 `
@@ -98,14 +82,9 @@ public class Main {
         {
             id: 'kotlin',
             name: 'Kotlin',
-            defaultCode: `// Kotlin Code Runner
-fun greet(name: String): String {
-    return "Hello, $name! Welcome to Code Runner."
-}
-
-fun main() {
-    val message = greet("Developer")
-    println(message)
+            defaultCode: `fun main() {
+    val name = readLine()
+    println("Hello, $name")
 }
 `
         }
@@ -246,7 +225,11 @@ fun main() {
                 }
             }
         } catch (error: any) {
-            this.output.set(`Network Error: ${error.message || 'Failed to connect to the server'}`);
+            let errorMsg = error.error?.message || error.error || error.message || 'Failed to connect to the server';
+            if (typeof errorMsg === 'object') {
+                errorMsg = JSON.stringify(errorMsg);
+            }
+            this.output.set(`Error: ${errorMsg}`);
         } finally {
             this.isLoading.set(false);
         }

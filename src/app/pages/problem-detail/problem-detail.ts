@@ -41,8 +41,8 @@ export class ProblemDetail implements OnInit, AfterViewChecked, OnDestroy {
     private modalEditor?: any;
     private isModalEditorInitializing = false;
 
-    availableLangs = ['python', 'c', 'cpp', 'java', 'kotlin'];
-    selectedLanguage = 'python';
+    availableLangs = ['c', 'cpp', 'python', 'java', 'kotlin'];
+    selectedLanguage = 'c';
     currentCode = '';
     contestId: number | null = null;
 
