@@ -1,10 +1,16 @@
 <div class="layout-container">
   
+  <!-- Sidebar Backdrop -->
+  <div class="sidebar-backdrop" *ngIf="isSidebarOpen()" (click)="closeSidebar()"></div>
+
   <!-- Sidebar Navigation -->
-  <aside class="sidebar premium-glass">
+  <aside class="sidebar premium-glass" [class.open]="isSidebarOpen()">
     <div class="logo-area">
       <div class="logo-icon">&lt;/&gt;</div>
       <h2>CodeRun</h2>
+      <button class="close-sidebar-btn" (click)="closeSidebar()">
+        <i-lucide name="x" class="icon"></i-lucide>
+      </button>
     </div>
 
     <nav class="nav-menu">
@@ -56,6 +62,9 @@
     <!-- Top Header -->
     <header class="top-header premium-glass">
       <div class="header-left">
+        <button class="menu-toggle-btn" (click)="toggleSidebar()">
+          <i-lucide name="menu" class="icon"></i-lucide>
+        </button>
         <!-- Optional search or breadcrumbs could go here -->
       </div>
       <div class="header-right">

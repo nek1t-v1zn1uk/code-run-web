@@ -5,12 +5,19 @@ import { AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
 import { UserProfileDto } from '../../models/user.models';
 import { filter, Subscription } from 'rxjs';
-import { LucideAngularModule, Home, Terminal, BookOpen, Trophy, Settings, LayoutDashboard, BarChart2, Activity } from 'lucide-angular';
+import { LucideAngularModule, Home, Terminal, BookOpen, Trophy, Settings, LayoutDashboard, BarChart2, Activity, Menu, X, LUCIDE_ICONS, LucideIconProvider } from 'lucide-angular';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
   imports: [CommonModule, RouterModule, LucideAngularModule],
+  providers: [
+    {
+      provide: LUCIDE_ICONS,
+      multi: true,
+      useValue: new LucideIconProvider({ Home, Terminal, BookOpen, Trophy, Settings, LayoutDashboard, BarChart2, Activity, Menu, X })
+    }
+  ],
   templateUrl: './layout.html',
   styleUrl: './layout.css'
 })
@@ -19,6 +26,7 @@ export class Layout implements OnInit, OnDestroy {
   private userService = inject(UserService);
   private router = inject(Router);
 
+  isSidebarOpen = signal<boolean>(false);
   activeContestId = signal<number | null>(null);
   activeContestTab = signal<'overview' | 'contesting' | 'scoreboard' | null>(null);
   userProfile = signal<UserProfileDto | null>(null);
@@ -31,6 +39,7 @@ export class Layout implements OnInit, OnDestroy {
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {
       this.checkUrl(event.urlAfterRedirects);
+      this.closeSidebar();
     });
     
     // Listen to profile updates globally
@@ -88,5 +97,13 @@ export class Layout implements OnInit, OnDestroy {
     const first = p.first_name?.charAt(0) || '';
     const last = p.last_name?.charAt(0) || '';
     return (first + last).toUpperCase() || 'U';
+  }
+
+  toggleSidebar(): void {
+    this.isSidebarOpen.update(v => !v);
+  }
+
+  closeSidebar(): void {
+    this.isSidebarOpen.set(false);
   }
 }

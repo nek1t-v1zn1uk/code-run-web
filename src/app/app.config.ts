@@ -2,7 +2,7 @@ import { ApplicationConfig, importProvidersFrom, provideBrowserGlobalErrorListen
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { routes } from './app.routes';
-import { LucideAngularModule, Home, Terminal, BookOpen, Trophy, Settings, LayoutDashboard, BarChart2, Activity, CheckCircle, XCircle, Clock, HardDrive, Camera, Trash2, Calendar, User, Shield, AlertCircle, X, Mail, Lock, Eye, EyeOff, Dices } from 'lucide-angular';
+import { LucideAngularModule, Home, Terminal, BookOpen, Trophy, Settings, LayoutDashboard, BarChart2, Activity, CheckCircle, XCircle, Clock, HardDrive, Camera, Trash2, Calendar, User, Shield, AlertCircle, X, Mail, Lock, Eye, EyeOff, Dices, Menu } from 'lucide-angular';
 import { authInterceptor } from './interceptors/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
@@ -12,6 +12,6 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withInterceptors([authInterceptor])
     ),
-    importProvidersFrom(LucideAngularModule.pick({ Home, Terminal, BookOpen, Trophy, Settings, LayoutDashboard, BarChart2, Activity, CheckCircle, XCircle, Clock, HardDrive, Camera, Trash2, Calendar, User, Shield, AlertCircle, X, Mail, Lock, Eye, EyeOff, Dices }))
+    importProvidersFrom(LucideAngularModule.pick({ Home, Terminal, BookOpen, Trophy, Settings, LayoutDashboard, BarChart2, Activity, CheckCircle, XCircle, Clock, HardDrive, Camera, Trash2, Calendar, User, Shield, AlertCircle, X, Mail, Lock, Eye, EyeOff, Dices, Menu }))
   ]
 };

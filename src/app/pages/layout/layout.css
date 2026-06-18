@@ -204,3 +204,88 @@
   font-weight: bold;
   font-size: 1.1rem;
 }
+
+/* Mobile responsive styles */
+.close-sidebar-btn,
+.menu-toggle-btn,
+.sidebar-backdrop {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 280px;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 9999;
+    background: rgba(15, 12, 41, 0.96) !important;
+    backdrop-filter: blur(20px);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .close-sidebar-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    padding: 0.5rem;
+    margin-left: auto;
+    transition: color 0.2s;
+  }
+
+  .close-sidebar-btn:hover {
+    color: #fff;
+  }
+
+  .menu-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    transition: background 0.2s;
+  }
+
+  .menu-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 9998;
+  }
+
+  .top-header {
+    padding: 0 1rem;
+  }
+
+  .user-name {
+    display: none; /* Hide username next to profile pic on small screens to save space */
+  }
+
+  .logo-area h2 {
+    font-size: 1.3rem;
+  }
+}

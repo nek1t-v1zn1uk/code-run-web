@@ -11,7 +11,7 @@ import { AuthService } from '../../services/auth.service';
 import { marked } from 'marked';
 import markedKatex from 'marked-katex-extension';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { LucideAngularModule } from 'lucide-angular';
+import { LucideAngularModule, Clock, HardDrive, LUCIDE_ICONS, LucideIconProvider } from 'lucide-angular';
 
 declare const monaco: any;
 declare const require: any;
@@ -24,6 +24,13 @@ import { ProblemComments } from './problem-comments/problem-comments';
     selector: 'app-problem-detail',
     standalone: true,
     imports: [CommonModule, FormsModule, ProblemComments, LucideAngularModule],
+    providers: [
+        {
+            provide: LUCIDE_ICONS,
+            multi: true,
+            useValue: new LucideIconProvider({ Clock, HardDrive })
+        }
+    ],
     templateUrl: './problem-detail.html',
     styleUrl: './problem-detail.css'
 })

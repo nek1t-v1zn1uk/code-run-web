@@ -8,7 +8,7 @@ import { ProblemDto } from '../../models/problem.models';
 import { forkJoin, map, Observable, of, switchMap, catchError, Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { ScoreboardWebSocketService } from '../../services/scoreboard-ws.service';
-import { LucideAngularModule } from 'lucide-angular';
+import { LucideAngularModule, CheckCircle, XCircle, LUCIDE_ICONS, LucideIconProvider } from 'lucide-angular';
 
 interface ContestProblemWithDetails extends ContestProblemDto {
     problemDetails?: ProblemDto;
@@ -18,6 +18,13 @@ interface ContestProblemWithDetails extends ContestProblemDto {
     selector: 'app-contest-detail',
     standalone: true,
     imports: [CommonModule, LucideAngularModule],
+    providers: [
+        {
+            provide: LUCIDE_ICONS,
+            multi: true,
+            useValue: new LucideIconProvider({ CheckCircle, XCircle })
+        }
+    ],
     templateUrl: './contest-detail.html',
     styleUrl: './contest-detail.css'
 })

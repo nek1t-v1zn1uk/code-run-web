@@ -3,12 +3,19 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UserService } from '../../services/user.service';
 import { UserProfileDto } from '../../models/user.models';
-import { LucideAngularModule } from 'lucide-angular';
+import { LucideAngularModule, CheckCircle, AlertCircle, X, Camera, Trash2, Calendar, User, Shield, Mail, Lock, Eye, EyeOff, LUCIDE_ICONS, LucideIconProvider } from 'lucide-angular';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, LucideAngularModule],
+  providers: [
+    {
+      provide: LUCIDE_ICONS,
+      multi: true,
+      useValue: new LucideIconProvider({ CheckCircle, AlertCircle, X, Camera, Trash2, Calendar, User, Shield, Mail, Lock, Eye, EyeOff })
+    }
+  ],
   templateUrl: './profile.html',
   styleUrl: './profile.css'
 })
