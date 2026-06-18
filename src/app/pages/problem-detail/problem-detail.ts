@@ -138,7 +138,7 @@ export class ProblemDetail implements OnInit, AfterViewChecked, OnDestroy {
         if (this.editor) return;
 
         this.editor = monaco.editor.create(container, {
-            value: this.currentCode || '# Write your solution here\n',
+            value: this.currentCode || '// Write your solution here\n',
             language: this.selectedLanguage,
             theme: 'vs-dark',
             automaticLayout: true,
