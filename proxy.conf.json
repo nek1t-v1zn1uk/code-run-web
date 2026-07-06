@@ -1,19 +1,19 @@
 {
     "/api": {
-        "target": "http://localhost:1488",
+        "target": "http://localhost:8080",
         "secure": false,
         "changeOrigin": true,
         "logLevel": "debug"
     },
     "/ws-coderun": {
-        "target": "ws://localhost:1488",
+        "target": "ws://localhost:8080",
         "ws": true,
         "secure": false,
         "changeOrigin": true,
         "logLevel": "debug"
     },
     "/uploads": {
-        "target": "http://localhost:1488",
+        "target": "http://localhost:8080",
         "secure": false,
         "changeOrigin": true,
         "logLevel": "debug"
